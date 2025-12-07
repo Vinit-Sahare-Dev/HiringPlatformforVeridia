@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext'
 import { PublicRoute, PrivateRoute, AdminRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
-import Layout from './components/layout/Layout'
+import Navbar from './components/layout/Navbar'
 
 // Public Pages
 import Login from './pages/Login'
@@ -25,26 +25,27 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Navbar />
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<Layout><Home /></Layout>} />
-            <Route path="/careers" element={<Layout><Careers /></Layout>} />
-            <Route path="/login" element={<Layout><PublicRoute><Login /></PublicRoute></Layout>} />
-            <Route path="/register" element={<Layout><PublicRoute><Register /></PublicRoute></Layout>} />
+            <Route path="/" element={<Home />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             
             {/* Candidate Routes */}
-            <Route path="/candidate/dashboard" element={<Layout><PrivateRoute><CandidateDashboard /></PrivateRoute></Layout>} />
-            <Route path="/candidate/profile" element={<Layout><PrivateRoute><CandidateProfile /></PrivateRoute></Layout>} />
-            <Route path="/candidate/apply" element={<Layout><PrivateRoute><ApplicationForm /></PrivateRoute></Layout>} />
+            <Route path="/candidate/dashboard" element={<PrivateRoute><CandidateDashboard /></PrivateRoute>} />
+            <Route path="/candidate/profile" element={<PrivateRoute><CandidateProfile /></PrivateRoute>} />
+            <Route path="/candidate/apply" element={<PrivateRoute><ApplicationForm /></PrivateRoute>} />
             
             {/* Admin Routes */}
-            <Route path="/admin/login" element={<Layout><AdminLogin /></Layout>} />
-            <Route path="/admin/login-debug" element={<Layout><AdminLoginDebug /></Layout>} />
-            <Route path="/admin/dashboard" element={<Layout><AdminRoute><AdminDashboard /></AdminRoute></Layout>} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/login-debug" element={<AdminLoginDebug />} />
+            <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             
             {/* Fallback */}
-            <Route path="*" element={<Layout><Navigate to="/" replace /></Layout>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </AuthProvider>

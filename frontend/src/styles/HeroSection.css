@@ -1,0 +1,343 @@
+/* Hero Section Styles */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(to bottom right, #dbeafe, white, #fef3c7);
+}
+
+/* Animated Background Elements */
+.hero-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-bg-circle-1 {
+  position: absolute;
+  top: -160px;
+  right: -160px;
+  width: 320px;
+  height: 320px;
+  background-color: #bfdbfe;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.hero-bg-circle-2 {
+  position: absolute;
+  bottom: -160px;
+  left: -160px;
+  width: 320px;
+  height: 320px;
+  background-color: #fef3c7;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: 2s;
+}
+
+.hero-bg-circle-3 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  background-color: #dbeafe;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: 4s;
+}
+
+/* Grid Pattern */
+.hero-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.05;
+}
+
+/* Content */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 80px 16px;
+}
+
+.hero-inner {
+  text-align: center;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: linear-gradient(to right, #dbeafe, #fef3c7);
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 32px;
+  backdrop-filter: blur(8px);
+}
+
+.hero-badge-icon {
+  width: 16px;
+  height: 16px;
+  margin: 0 8px;
+  color: #2563eb;
+}
+
+/* Main Heading */
+.hero-title {
+  font-size: 48px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 24px;
+  line-height: 1.1;
+}
+
+.hero-title-gradient {
+  background: linear-gradient(to right, #2563eb, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-title-normal {
+  color: #111827;
+}
+
+/* Subheading */
+.hero-subtitle {
+  font-size: 20px;
+  color: #6b7280;
+  margin-bottom: 32px;
+  max-width: 768px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+/* Stats Bar */
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 4px;
+}
+
+.hero-stat-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.hero-stat-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* CTA Buttons */
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 64px;
+}
+
+.hero-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 32px;
+  background: linear-gradient(to right, #2563eb, #f59e0b);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.hero-primary-button:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.hero-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 32px;
+  background-color: white;
+  color: #374151;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d1d5db;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.hero-secondary-button:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.hero-button-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.hero-primary-button:hover .hero-button-icon {
+  transform: translateX(4px);
+}
+
+/* Trust Indicators */
+.hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.hero-trust-item {
+  display: flex;
+  align-items: center;
+}
+
+.hero-trust-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.hero-trust-icon.secure {
+  color: #10b981;
+}
+
+.hero-trust-icon.instant {
+  color: #f59e0b;
+}
+
+.hero-trust-icon.global {
+  color: #2563eb;
+}
+
+/* Scroll Indicator */
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 1s infinite;
+}
+
+.hero-scroll-mouse {
+  width: 24px;
+  height: 40px;
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-scroll-wheel {
+  width: 4px;
+  height: 12px;
+  background-color: #9ca3af;
+  border-radius: 2px;
+  margin-top: 8px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .hero-content {
+    padding: 80px 24px;
+  }
+  
+  .hero-title {
+    font-size: 64px;
+  }
+  
+  .hero-subtitle {
+    font-size: 24px;
+  }
+  
+  .hero-buttons {
+    flex-direction: row;
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-content {
+    padding: 80px 32px;
+  }
+  
+  .hero-title {
+    font-size: 80px;
+  }
+}
