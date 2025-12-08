@@ -95,30 +95,26 @@ const AdminDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'SUBMITTED':
-        return 'status-submitted'
-      case 'REVIEWED':
-        return 'status-reviewed'
-      case 'SHORTLISTED':
-        return 'status-shortlisted'
-      case 'SELECTED':
-        return 'status-selected'
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'UNDER_REVIEW':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'ACCEPTED':
+        return 'bg-green-100 text-green-800 border-green-200'
       case 'REJECTED':
-        return 'status-rejected'
+        return 'bg-red-100 text-red-800 border-red-200'
       default:
-        return 'status-submitted'
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'SUBMITTED':
-        return <FileText className="w-4 h-4" />
-      case 'REVIEWED':
+      case 'PENDING':
         return <Clock className="w-4 h-4" />
-      case 'SHORTLISTED':
+      case 'UNDER_REVIEW':
         return <AlertCircle className="w-4 h-4" />
-      case 'SELECTED':
+      case 'ACCEPTED':
         return <CheckCircle className="w-4 h-4" />
       case 'REJECTED':
         return <AlertCircle className="w-4 h-4" />
@@ -137,10 +133,10 @@ const AdminDashboard = () => {
 
   const stats = {
     total: applications.length,
-    submitted: applications.filter(app => app.status === 'SUBMITTED').length,
-    reviewed: applications.filter(app => app.status === 'REVIEWED').length,
+    pending: applications.filter(app => app.status === 'PENDING').length,
+    underReview: applications.filter(app => app.status === 'UNDER_REVIEW').length,
     shortlisted: applications.filter(app => app.status === 'SHORTLISTED').length,
-    selected: applications.filter(app => app.status === 'SELECTED').length,
+    accepted: applications.filter(app => app.status === 'ACCEPTED').length,
     rejected: applications.filter(app => app.status === 'REJECTED').length
   }
 
@@ -167,24 +163,42 @@ const AdminDashboard = () => {
           <div className="text-sm text-secondary-600">Total</div>
         </div>
         <div className="card p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{stats.submitted}</div>
-          <div className="text-sm text-secondary-600">Submitted</div>
+          <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+          <div className="text-sm text-secondary-600">Pending</div>
         </div>
         <div className="card p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{stats.reviewed}</div>
-          <div className="text-sm text-secondary-600">Reviewed</div>
+          <div className="text-2xl font-bold text-blue-600">{stats.underReview}</div>
+          <div className="text-sm text-secondary-600">Under Review</div>
         </div>
         <div className="card p-4 text-center">
           <div className="text-2xl font-bold text-purple-600">{stats.shortlisted}</div>
           <div className="text-sm text-secondary-600">Shortlisted</div>
         </div>
         <div className="card p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{stats.selected}</div>
-          <div className="text-sm text-secondary-600">Selected</div>
+          <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
+          <div className="text-sm text-secondary-600">Accepted</div>
         </div>
         <div className="card p-4 text-center">
           <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
           <div className="text-sm text-secondary-600">Rejected</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="card mb-6">
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-secondary-900 mb-4">Quick Actions</h3>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/admin/applications" className="btn-primary">
+              View All Applications
+            </Link>
+            <button className="btn-secondary">
+              Export Reports
+            </button>
+            <button className="btn-secondary">
+              Send Bulk Emails
+            </button>
+          </div>
         </div>
       </div>
 
@@ -213,10 +227,10 @@ const AdminDashboard = () => {
                 className="input-field"
               >
                 <option value="">All Status</option>
-                <option value="SUBMITTED">Submitted</option>
-                <option value="REVIEWED">Reviewed</option>
+                <option value="PENDING">Pending</option>
+                <option value="UNDER_REVIEW">Under Review</option>
                 <option value="SHORTLISTED">Shortlisted</option>
-                <option value="SELECTED">Selected</option>
+                <option value="ACCEPTED">Accepted</option>
                 <option value="REJECTED">Rejected</option>
               </select>
             </div>
@@ -299,7 +313,7 @@ const AdminDashboard = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`status-badge ${getStatusColor(application.status)}`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(application.status)}`}>
                       {getStatusIcon(application.status)}
                       <span className="ml-1">{application.status}</span>
                     </span>
@@ -316,10 +330,10 @@ const AdminDashboard = () => {
                         disabled={updatingId === application.id}
                         className="text-sm border border-secondary-300 rounded px-2 py-1 disabled:opacity-50"
                       >
-                        <option value="SUBMITTED">Submitted</option>
-                        <option value="REVIEWED">Reviewed</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="UNDER_REVIEW">Under Review</option>
                         <option value="SHORTLISTED">Shortlisted</option>
-                        <option value="SELECTED">Selected</option>
+                        <option value="ACCEPTED">Accepted</option>
                         <option value="REJECTED">Rejected</option>
                       </select>
                       

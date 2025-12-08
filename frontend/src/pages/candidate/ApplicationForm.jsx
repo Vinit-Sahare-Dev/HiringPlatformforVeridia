@@ -165,8 +165,8 @@ const ApplicationForm = () => {
       setSuccess(true)
       
       setTimeout(() => {
-        navigate('/candidate/dashboard')
-      }, 2000)
+        navigate('/careers')
+      }, 3000)
       
     } catch (error) {
       console.error('Application submission error:', error)
@@ -216,8 +216,8 @@ const ApplicationForm = () => {
             <p className="text-secondary-600 mb-8">
               Thank you for your interest in Veridia. Your application has been received and will be reviewed by our team.
             </p>
-            <p className="text-sm text-secondary-500">
-              Redirecting to your dashboard...
+            <p className="text-sm text-secondary-500 animate-pulse">
+              Redirecting to careers page...
             </p>
           </div>
         </div>

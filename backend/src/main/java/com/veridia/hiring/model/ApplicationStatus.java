@@ -1,9 +1,9 @@
 package com.veridia.hiring.model;
 
 public enum ApplicationStatus {
-    SUBMITTED,
-    REVIEWED,
+    PENDING,
+    UNDER_REVIEW,
     SHORTLISTED,
-    SELECTED,
+    ACCEPTED,
     REJECTED
 }

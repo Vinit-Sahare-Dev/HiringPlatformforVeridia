@@ -55,7 +55,7 @@ public class Application {
     private LocalDateTime updatedAt;
 
     public Application() {
-        this.status = ApplicationStatus.SUBMITTED;
+        this.status = ApplicationStatus.PENDING;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

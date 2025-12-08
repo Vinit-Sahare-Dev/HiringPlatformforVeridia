@@ -9,10 +9,13 @@ C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\dto\Applica
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\dto\RegisterRequest.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\config\BeanConfig.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\controller\AuthController.java
+C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\dto\ApiResponse.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\service\EmailService.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\dto\AuthResponse.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\service\UserService.java
+C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\exception\GlobalExceptionHandler.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\model\Application.java
+C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\exception\ErrorResponse.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\model\Job.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\security\JwtAuthenticationFilter.java
 C:\HiringPlatformforVeridia\backend\src\main\java\com\veridia\hiring\model\User.java

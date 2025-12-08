@@ -1,0 +1,203 @@
+/* Applications Page Specific Styles */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border;
+}
+
+.status-submitted {
+  @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+.status-reviewed {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.status-shortlisted {
+  @apply bg-purple-100 text-purple-800 border-purple-200;
+}
+
+.status-selected {
+  @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800 border-red-200;
+}
+
+/* Card Hover Effects */
+.application-card {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+.application-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Expandable Content */
+.expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.expandable-content.expanded {
+  max-height: 2000px;
+  transition: max-height 0.5s ease-in;
+}
+
+/* Skills Tags */
+.skill-tag {
+  @apply inline-flex items-center px-2 py-1 rounded text-xs bg-primary-100 text-primary-800 border border-primary-200 transition-colors;
+}
+
+.skill-tag:hover {
+  @apply bg-primary-200 text-primary-900;
+}
+
+/* Action Buttons */
+.action-button {
+  @apply px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.action-button-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+}
+
+.action-button-secondary {
+  @apply bg-secondary-200 text-secondary-800 hover:bg-secondary-300 focus:ring-secondary-500;
+}
+
+.action-button-success {
+  @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+}
+
+.action-button-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+/* Stats Cards */
+.stats-card {
+  @apply p-4 text-center transition-all duration-300 hover:shadow-md hover:scale-105;
+}
+
+.stats-card .stats-icon {
+  @apply inline-flex items-center justify-center w-12 h-12 rounded-full mb-2 transition-transform duration-300;
+}
+
+.stats-card:hover .stats-icon {
+  @apply scale-110;
+}
+
+/* Filter Pills */
+.filter-pill {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary-100 text-secondary-800 border border-secondary-300 transition-all duration-200;
+}
+
+.filter-pill.active {
+  @apply bg-primary-100 text-primary-800 border-primary-300;
+}
+
+.filter-pill:hover {
+  @apply bg-secondary-200 text-secondary-900;
+}
+
+/* Loading States */
+.loading-skeleton {
+  @apply bg-gradient-to-r from-secondary-200 to-secondary-300 rounded animate-pulse;
+}
+
+.loading-skeleton.text {
+  @apply h-4 w-3/4 mb-2;
+}
+
+.loading-skeleton.title {
+  @apply h-6 w-1/2 mb-4;
+}
+
+.loading-skeleton.card {
+  @apply h-32 w-full mb-4;
+}
+
+/* Empty States */
+.empty-state {
+  @apply text-center py-12;
+}
+
+.empty-state-icon {
+  @apply inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4;
+}
+
+.empty-state-title {
+  @apply text-lg font-medium text-secondary-900 mb-2;
+}
+
+.empty-state-description {
+  @apply text-secondary-600;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .application-card {
+    @apply mx-2;
+  }
+  
+  .stats-card {
+    @apply p-3;
+  }
+  
+  .stats-card .stats-icon {
+    @apply w-10 h-10;
+  }
+  
+  .action-button {
+    @apply px-2 py-1 text-xs;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .application-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+/* Focus Styles for Accessibility */
+.action-button:focus-visible {
+  @apply ring-2 ring-offset-2 ring-primary-500 outline-none;
+}
+
+.filter-pill:focus-visible {
+  @apply ring-2 ring-offset-2 ring-primary-500 outline-none;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .status-badge {
+    @apply border-2;
+  }
+  
+  .application-card {
+    @apply border-2 border-secondary-300;
+  }
+}

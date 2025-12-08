@@ -15,11 +15,13 @@ import Careers from './pages/Careers'
 import CandidateDashboard from './pages/candidate/Dashboard'
 import CandidateProfile from './pages/candidate/Profile'
 import ApplicationForm from './pages/candidate/ApplicationForm'
+import CandidateNotifications from './pages/candidate/Notifications'
 
 // Admin Pages
 import AdminLogin from './pages/admin/Login'
 import AdminLoginDebug from './pages/admin/LoginDebug'
 import AdminDashboard from './pages/admin/Dashboard'
+import AdminApplications from './pages/admin/Applications'
 
 function App() {
   return (
@@ -38,11 +40,13 @@ function App() {
             <Route path="/candidate/dashboard" element={<PrivateRoute><CandidateDashboard /></PrivateRoute>} />
             <Route path="/candidate/profile" element={<PrivateRoute><CandidateProfile /></PrivateRoute>} />
             <Route path="/candidate/apply" element={<PrivateRoute><ApplicationForm /></PrivateRoute>} />
+            <Route path="/candidate/notifications" element={<PrivateRoute><CandidateNotifications /></PrivateRoute>} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/login-debug" element={<AdminLoginDebug />} />
             <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/applications" element={<AdminRoute><AdminApplications /></AdminRoute>} />
             
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

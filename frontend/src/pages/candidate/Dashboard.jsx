@@ -19,7 +19,8 @@ import {
   Award,
   TrendingUp,
   Star,
-  Users
+  Users,
+  Bell
 } from 'lucide-react'
 
 const Dashboard = () => {
@@ -44,13 +45,13 @@ const Dashboard = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'SUBMITTED':
-        return <CheckCircle className="w-5 h-5" />
-      case 'REVIEWED':
+      case 'PENDING':
         return <Clock className="w-5 h-5" />
-      case 'SHORTLISTED':
+      case 'UNDER_REVIEW':
         return <AlertCircle className="w-5 h-5" />
-      case 'SELECTED':
+      case 'SHORTLISTED':
+        return <Star className="w-5 h-5" />
+      case 'ACCEPTED':
         return <CheckCircle className="w-5 h-5" />
       case 'REJECTED':
         return <AlertCircle className="w-5 h-5" />
@@ -61,18 +62,18 @@ const Dashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'SUBMITTED':
-        return 'status-submitted'
-      case 'REVIEWED':
-        return 'status-reviewed'
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'UNDER_REVIEW':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
       case 'SHORTLISTED':
-        return 'status-shortlisted'
-      case 'SELECTED':
-        return 'status-selected'
+        return 'bg-purple-100 text-purple-800 border-purple-200'
+      case 'ACCEPTED':
+        return 'bg-green-100 text-green-800 border-green-200'
       case 'REJECTED':
-        return 'status-rejected'
+        return 'bg-red-100 text-red-800 border-red-200'
       default:
-        return 'status-submitted'
+        return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -209,7 +210,7 @@ const Dashboard = () => {
               <div className="card-header">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-secondary-900">Application Details</h3>
-                  <span className={`status-badge ${getStatusColor(application.status)}`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(application.status)}`}>
                     {getStatusIcon(application.status)}
                     <span className="ml-1">{application.status}</span>
                   </span>
@@ -360,6 +361,13 @@ const Dashboard = () => {
                   className="btn-secondary w-full text-center"
                 >
                   Update Profile
+                </Link>
+                <Link
+                  to="/candidate/notifications"
+                  className="btn-secondary w-full text-center flex items-center justify-center"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  View Notifications
                 </Link>
                 <Link
                   to="/candidate/apply"

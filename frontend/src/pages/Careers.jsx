@@ -287,7 +287,7 @@ const Careers = () => {
         </div>
 
         {/* Job Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8">
           {filteredJobs.slice(0, visibleJobs).map((job) => (
             <div 
               key={job.id} 
