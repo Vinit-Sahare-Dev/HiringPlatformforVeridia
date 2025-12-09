@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { LogOut, User, Briefcase, Shield, Home, Menu, X, ChevronDown } from 'lucide-react'
+import '../styles/Navbar.css'
 
 const Navbar = () => {
   const { user, isAuthenticated, logout, isAdmin, isCandidate } = useAuth()

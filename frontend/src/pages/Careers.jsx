@@ -29,6 +29,7 @@ import {
   Eye,
   Timer
 } from 'lucide-react'
+import '../styles/Professional.css'
 
 const Careers = () => {
   const [searchTerm, setSearchTerm] = useState('')

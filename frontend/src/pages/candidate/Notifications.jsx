@@ -10,6 +10,7 @@ import {
   Info,
   AlertCircle
 } from 'lucide-react'
+import '../../styles/Applications.css'
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([])

@@ -23,6 +23,7 @@ import {
   UserCheck,
   UserX
 } from 'lucide-react'
+import '../../styles/Applications.css'
 
 const Applications = () => {
   const [applications, setApplications] = useState([])

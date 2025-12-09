@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Eye, EyeOff, Mail, Lock, Briefcase, Shield, ArrowRight } from 'lucide-react'
-import { authAPI } from '../services/api'
-import '../styles/Login.css'
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { authAPI } from '../services/api';
+import '../styles/auth.css';
+import { Eye, EyeOff, Mail, Lock, Briefcase, Shield, AlertCircle, CheckCircle } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -13,12 +14,11 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
 
+  const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
-  // show success message after registration redirect
   useEffect(() => {
     if (location.state?.message) {
       setSuccessMessage(location.state.message)
@@ -38,63 +38,55 @@ const Login = () => {
     setSuccessMessage('')
 
     try {
-      const response = await authAPI.login(formData)
-
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
-      }
-
-      setSuccessMessage('Login successful! Redirecting...')
-
-      setTimeout(() => {
-        navigate('/candidate/dashboard')
-      }, 1500)
-    } catch (err) {
-      console.error('Login Error:', err)
-
-      if (err.response?.data?.message) {
-        setError(err.response.data.message)
+      const result = await login(formData.email, formData.password)
+      
+      if (result.success) {
+        setSuccessMessage('Login successful! Redirecting...')
+        setTimeout(() => {
+          navigate('/candidate/dashboard')
+        }, 1500)
       } else {
-        setError('Cannot connect to server. Please ensure backend is running on port 8080.')
+        setError(result.error || 'Login failed. Please try again.')
       }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
     <div className="auth-layout">
       <div className="auth-container">
         <div className="auth-card">
-
-          {/* Header */}
+          {/* Header Section */}
           <div className="auth-header">
             <div className="auth-logo">
-              <Briefcase size={30} />
+              <Briefcase className="w-8 h-8" />
             </div>
-
             <h1 className="auth-title">Welcome Back</h1>
             <p className="auth-subtitle">Sign in to continue your journey</p>
           </div>
 
-          {/* Alert Messages */}
-          {successMessage && (
-            <div className="auth-alert auth-alert-success">
-              <Shield size={16} /> {successMessage}
-            </div>
-          )}
-
-          {error && (
-            <div className="auth-alert auth-alert-error">
-              {error}
-            </div>
-          )}
-
-          {/* Form */}
+          {/* Form Section */}
           <form onSubmit={handleSubmit} className="auth-form">
+            {/* Success Message */}
+            {successMessage && (
+              <div className="auth-alert auth-alert-success">
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                <p>{successMessage}</p>
+              </div>
+            )}
 
-            {/* Email */}
+            {/* Error Message */}
+            {error && (
+              <div className="auth-alert auth-alert-error">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
+
+            {/* Email Field */}
             <div className="auth-form-group">
               <label className="auth-label">Email Address</label>
               <div className="auth-input-wrapper">
@@ -111,13 +103,17 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Password */}
+            {/* Password Field */}
             <div className="auth-form-group">
               <div className="auth-label-row">
                 <label className="auth-label">Password</label>
-                <Link className="auth-link" to="/forgot-password">Forgot Password?</Link>
+                <Link 
+                  to="/forgot-password" 
+                  className="auth-link"
+                >
+                  Forgot Password?
+                </Link>
               </div>
-
               <div className="auth-input-wrapper">
                 <Lock className="auth-input-icon" />
                 <input
@@ -129,51 +125,70 @@ const Login = () => {
                   onChange={handleChange}
                   className="auth-input"
                 />
-
                 <button
                   type="button"
-                  className="auth-password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="auth-password-toggle"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
-            {/* Remember me */}
-            <label className="auth-checkbox-label">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="auth-checkbox"
-              />
-              Remember me for 30 days
-            </label>
-
             {/* Submit Button */}
-            <button className="auth-button" disabled={loading} type="submit">
+            <button
+              type="submit"
+              disabled={loading}
+              className="auth-button"
+            >
               {loading ? (
                 <>
                   <div className="auth-spinner"></div>
-                  Signing in...
+                  <span>Signing in...</span>
                 </>
               ) : (
-                <>
-                  Sign In
-                  <ArrowRight size={16} />
-                </>
+                'Sign In'
               )}
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="auth-footer">
-            <p>Are you an admin? <Link className="auth-footer-link" to="/admin/login">Admin Login</Link></p>
-            <p>Don't have an account? <Link className="auth-footer-link" to="/register">Create an account</Link></p>
+          {/* Divider */}
+          <div className="auth-divider">
+            <div className="auth-divider-line"></div>
+            <span className="auth-divider-text">or</span>
+            <div className="auth-divider-line"></div>
           </div>
 
+          {/* Additional Links */}
+          <div className="auth-footer">
+            <div className="auth-footer-section">
+              <p className="auth-footer-text">
+                Don't have an account?{' '}
+                <Link to="/register" className="auth-footer-link">
+                  Create an account
+                </Link>
+              </p>
+            </div>
+            <div className="auth-footer-section">
+              <p className="auth-footer-text">
+                Are you an admin?{' '}
+                <Link to="/admin/login" className="auth-footer-link inline-flex items-center gap-1">
+                  <Shield className="w-4 h-4" />
+                  Admin Login
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
+
+        {/* Footer Text */}
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Protected by industry-standard encryption
+        </p>
       </div>
     </div>
   )

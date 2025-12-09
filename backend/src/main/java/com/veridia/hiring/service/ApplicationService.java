@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class ApplicationService {
@@ -23,6 +25,15 @@ public class ApplicationService {
     private ApplicationRepository applicationRepository;
 
     private final String UPLOAD_DIR = "uploads/resumes/";
+    
+    // File validation constants
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "doc", "docx");
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
 
     public Application submitApplication(User candidate, String firstName, String lastName, String phone, 
                                        String location, String linkedinProfile, String githubProfile, 
@@ -38,6 +49,8 @@ public class ApplicationService {
 
         String resumeUrl = null;
         if (resume != null && !resume.isEmpty()) {
+            // Validate file before saving
+            validateResumeFile(resume);
             resumeUrl = saveResume(resume, candidate.getEmail());
         }
 
@@ -98,11 +111,14 @@ public class ApplicationService {
                 Files.createDirectories(uploadPath);
             }
 
-            // Generate unique filename
+            // Generate unique filename with UUID for better security
             String originalFilename = file.getOriginalFilename();
-            String fileExtension = originalFilename != null ? 
-                originalFilename.substring(originalFilename.lastIndexOf(".")) : ".pdf";
-            String filename = userEmail.replace("@", "_").replace(".", "_") + "_resume" + fileExtension;
+            if (originalFilename == null || originalFilename.trim().isEmpty()) {
+                throw new RuntimeException("Invalid filename");
+            }
+            
+            String fileExtension = getFileExtension(originalFilename);
+            String filename = sanitizeFilename(userEmail) + "_" + UUID.randomUUID().toString().substring(0, 8) + "_resume" + fileExtension;
             
             Path filePath = uploadPath.resolve(filename);
             Files.copy(file.getInputStream(), filePath);
@@ -111,6 +127,47 @@ public class ApplicationService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to save resume file", e);
         }
+    }
+    
+    private void validateResumeFile(MultipartFile file) {
+        // Check file size
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new RuntimeException("File size exceeds maximum limit of 10MB");
+        }
+        
+        // Check if file is empty
+        if (file.isEmpty()) {
+            throw new RuntimeException("File is empty");
+        }
+        
+        // Check file extension
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null) {
+            throw new RuntimeException("Invalid filename");
+        }
+        
+        String fileExtension = getFileExtension(originalFilename);
+        if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
+            throw new RuntimeException("Invalid file type. Only PDF, DOC, and DOCX files are allowed");
+        }
+        
+        // Check MIME type
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType)) {
+            throw new RuntimeException("Invalid file type. Only PDF, DOC, and DOCX files are allowed");
+        }
+    }
+    
+    private String getFileExtension(String filename) {
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex == -1 || lastDotIndex == filename.length() - 1) {
+            throw new RuntimeException("Invalid file extension");
+        }
+        return filename.substring(lastDotIndex + 1);
+    }
+    
+    private String sanitizeFilename(String filename) {
+        return filename.replaceAll("[^a-zA-Z0-9._-]", "_");
     }
 
     public byte[] getResumeFile(String filename) throws IOException {

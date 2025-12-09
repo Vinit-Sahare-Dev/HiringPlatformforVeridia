@@ -2,52 +2,78 @@ import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
-// Create axios instance with timeout
+// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 second timeout
+  timeout: 15000, // 15 second timeout
+  withCredentials: true, // Important for CORS with credentials
 })
 
-// Add request interceptor to include auth token
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    console.log(`[API] ${config.method.toUpperCase()} ${config.url}`)
     return config
   },
   (error) => {
+    console.error('[API] Request error:', error)
     return Promise.reject(error)
   }
 )
 
-// Add response interceptor to handle errors
+// Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`[API] Response from ${response.config.url}:`, response.status)
+    return response
+  },
   (error) => {
-    console.error('API Error:', error)
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      response: error.response?.data,
-      status: error.response?.status
-    })
+    console.error('[API] Response error:', error)
     
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
-    }
-    
+    // Handle different error types
     if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-      console.error('Backend server not running. Please start the backend server.')
+      console.error('❌ Backend server not running on port 8080')
+      return Promise.reject({
+        code: error.code,
+        message: 'Cannot connect to server. Please ensure the backend is running on port 8080.'
+      })
     }
     
-    return Promise.reject(error)
+    if (error.response) {
+      const { status, data } = error.response
+      
+      // Handle 401 Unauthorized
+      if (status === 401) {
+        console.warn('⚠️ Unauthorized access - clearing session')
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        
+        // Only redirect if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login'
+        }
+      }
+      
+      // Return structured error
+      return Promise.reject({
+        status,
+        message: data?.message || data?.error || 'An error occurred',
+        data: data,
+        response: error.response
+      })
+    }
+    
+    return Promise.reject({
+      message: error.message || 'An unexpected error occurred',
+      error
+    })
   }
 )
 
@@ -59,9 +85,39 @@ export const healthAPI = {
 
 // Auth API
 export const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  getCurrentUser: () => api.get('/candidate/me'),
+  login: async (credentials) => {
+    try {
+      console.log('[AUTH] Attempting login for:', credentials.email)
+      const response = await api.post('/auth/login', credentials)
+      console.log('[AUTH] Login successful')
+      return response
+    } catch (error) {
+      console.error('[AUTH] Login failed:', error)
+      throw error
+    }
+  },
+  
+  register: async (userData) => {
+    try {
+      console.log('[AUTH] Attempting registration for:', userData.email)
+      const response = await api.post('/auth/register', userData)
+      console.log('[AUTH] Registration successful')
+      return response
+    } catch (error) {
+      console.error('[AUTH] Registration failed:', error)
+      throw error
+    }
+  },
+  
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get('/candidate/me')
+      return response
+    } catch (error) {
+      console.error('[AUTH] Get current user failed:', error)
+      throw error
+    }
+  },
 }
 
 // Candidate API
@@ -73,25 +129,54 @@ export const candidateAPI = {
 // Application API
 export const applicationAPI = {
   submitApplication: (formData) => {
-    const formDataObj = new FormData()
-    Object.keys(formData).forEach(key => {
-      if (formData[key] !== null && formData[key] !== undefined) {
-        formDataObj.append(key, formData[key])
-      }
-    })
-    return api.post('/application/submit', formDataObj, {
+    return api.post('/application/submit', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 30000, // 30 seconds for file uploads
     })
   },
+  
   getMyApplication: () => api.get('/application/me'),
+  
   getAllApplications: () => api.get('/application/admin/all'),
+  
   updateApplicationStatus: (id, status) => 
     api.put(`/application/admin/update-status/${id}`, { status }),
-  searchApplications: (params) => api.get('/application/admin/search', { params }),
+  
+  searchApplications: (params) => 
+    api.get('/application/admin/search', { params }),
+  
   downloadResume: (filename) => 
-    api.get(`/application/admin/resume/${filename}`, { responseType: 'blob' }),
+    api.get(`/application/admin/resume/${filename}`, { 
+      responseType: 'blob',
+      timeout: 30000 
+    }),
+}
+
+// Job API
+export const jobAPI = {
+  getAllJobs: () => api.get('/jobs'),
+  getFeaturedJobs: () => api.get('/jobs/featured'),
+  getJobById: (id) => api.get(`/jobs/${id}`),
+  searchJobs: (params) => api.get('/jobs/search', { params }),
+  getJobFilters: () => api.get('/jobs/filters'),
+}
+
+// Test backend connection
+export const testBackendConnection = async () => {
+  try {
+    console.log('🔍 Testing backend connection...')
+    const response = await healthAPI.check()
+    console.log('✅ Backend is running:', response.data)
+    return { success: true, data: response.data }
+  } catch (error) {
+    console.error('❌ Backend connection failed:', error)
+    return { 
+      success: false, 
+      error: error.message || 'Backend connection failed' 
+    }
+  }
 }
 
 export default api

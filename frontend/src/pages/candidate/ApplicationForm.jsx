@@ -1,27 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { applicationAPI } from '../../services/api'
-import { 
-  Upload, 
-  FileText, 
-  Send, 
-  AlertCircle,
-  CheckCircle,
-  User,
-  Phone,
-  Briefcase,
-  GraduationCap,
-  Link as LinkIcon,
-  Calendar,
-  MapPin,
-  Award,
-  Code,
-  Globe,
-  Plus,
-  X,
-  Save,
-  ChevronRight
-} from 'lucide-react'
+import { Send, AlertCircle, CheckCircle, Briefcase } from 'lucide-react'
+import '../../styles/Applications.css'
+
+// Import form components
+import PersonalInfoForm from '../../components/forms/PersonalInfoForm'
+import SkillsForm from '../../components/forms/SkillsForm'
+import EducationForm from '../../components/forms/EducationForm'
+import FileUploadForm from '../../components/forms/FileUploadForm'
+import JobPreferencesForm from '../../components/forms/JobPreferencesForm'
 
 const ApplicationForm = () => {
   const navigate = useNavigate()
@@ -48,11 +36,10 @@ const ApplicationForm = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [existingApplication, setExistingApplication] = useState(null)
-  const [newSkill, setNewSkill] = useState('')
-  const [showAddEducation, setShowAddEducation] = useState(false)
-  const [showAddExperience, setShowAddExperience] = useState(false)
-  const [showAddCertification, setShowAddCertification] = useState(false)
-  const [showSkillsSection, setShowSkillsSection] = useState(false)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [formErrors, setFormErrors] = useState({})
+
+  const totalSteps = 5
 
   useEffect(() => {
     checkExistingApplication()
@@ -61,807 +48,332 @@ const ApplicationForm = () => {
   const checkExistingApplication = async () => {
     try {
       const response = await applicationAPI.getMyApplication()
-      setExistingApplication(response.data)
+      if (response.data) {
+        setExistingApplication(response.data)
+        setFormData({
+          firstName: response.data.firstName || '',
+          lastName: response.data.lastName || '',
+          phone: response.data.phone || '',
+          location: response.data.location || '',
+          linkedinProfile: response.data.linkedinProfile || '',
+          githubProfile: response.data.githubProfile || '',
+          portfolioLink: response.data.portfolioLink || '',
+          skills: response.data.skills || [],
+          education: response.data.education || [],
+          experience: response.data.experience || [],
+          certifications: response.data.certifications || [],
+          availability: response.data.availability || '',
+          expectedSalary: response.data.expectedSalary || '',
+          noticePeriod: response.data.noticePeriod || '',
+          workMode: response.data.workMode || 'remote'
+        })
+      }
     } catch (error) {
-      // No existing application
+      if (error.response?.status !== 404) {
+        console.error('Error checking existing application:', error)
+      }
     }
   }
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-    setError('')
-  }
-
-  const addSkill = () => {
-    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
-      setFormData({
-        ...formData,
-        skills: [...formData.skills, newSkill.trim()]
-      })
-      setNewSkill('')
+  const handleFormDataChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    // Clear error for this field
+    if (formErrors[field]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }))
     }
   }
 
-  const removeSkill = (skillToRemove) => {
-    setFormData({
-      ...formData,
-      skills: formData.skills.filter(skill => skill !== skillToRemove)
-    })
+  const validateStep = (step) => {
+    const errors = {}
+
+    switch (step) {
+      case 1: // Personal Info
+        if (!formData.firstName.trim()) errors.firstName = 'First name is required'
+        if (!formData.lastName.trim()) errors.lastName = 'Last name is required'
+        if (!formData.phone.trim()) errors.phone = 'Phone number is required'
+        if (!formData.location.trim()) errors.location = 'Location is required'
+        break
+      case 2: // Skills
+        if (formData.skills.length === 0) errors.skills = 'At least one skill is required'
+        break
+      case 3: // Education
+        if (formData.education.length === 0) errors.education = 'At least one education entry is required'
+        break
+      case 4: // Files
+        if (!resumeFile) errors.resume = 'Resume is required'
+        break
+      case 5: // Job Preferences
+        if (!formData.availability) errors.availability = 'Availability is required'
+        if (!formData.workMode) errors.workMode = 'Work mode is required'
+        break
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
-  const handleFileChange = (e, fileType) => {
-    const file = e.target.files[0]
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Please upload a PDF file')
-        return
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        setError('File size must be less than 10MB')
-        return
-      }
-      if (fileType === 'resume') {
-        setResumeFile(file)
-      } else if (fileType === 'coverLetter') {
-        setCoverLetterFile(file)
-      }
-      setError('')
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps))
     }
+  }
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1))
+  }
+
+  const validateForm = () => {
+    const errors = {}
+
+    // Personal Info
+    if (!formData.firstName.trim()) errors.firstName = 'First name is required'
+    if (!formData.lastName.trim()) errors.lastName = 'Last name is required'
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required'
+    if (!formData.location.trim()) errors.location = 'Location is required'
+
+    // Skills
+    if (formData.skills.length === 0) errors.skills = 'At least one skill is required'
+
+    // Education
+    if (formData.education.length === 0) errors.education = 'At least one education entry is required'
+
+    // Files
+    if (!resumeFile) errors.resume = 'Resume is required'
+
+    // Job Preferences
+    if (!formData.availability) errors.availability = 'Availability is required'
+    if (!formData.workMode) errors.workMode = 'Work mode is required'
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setError('First name and last name are required')
+    if (!validateForm()) {
       return
     }
-    
-    if (!formData.phone.trim()) {
-      setError('Phone number is required')
-      return
-    }
-    
-    if (!resumeFile) {
-      setError('Please upload your resume')
-      return
-    }
-    
+
     setLoading(true)
     setError('')
-    
+
     try {
-      const submissionData = new FormData()
+      const formDataToSend = new FormData()
       
-      const applicationData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        location: formData.location,
-        linkedinProfile: formData.linkedinProfile,
-        githubProfile: formData.githubProfile,
-        portfolioLink: formData.portfolioLink,
-        skills: formData.skills.join(', '),
-        education: formData.education.map(edu => 
-          `${edu.degree} in ${edu.field} from ${edu.institution} (${edu.startYear} - ${edu.endYear})`
-        ).join('\n\n'),
-        experience: formData.experience.map(exp => 
-          `${exp.position} at ${exp.company} (${exp.startDate} - ${exp.endDate})\n${exp.description}`
-        ).join('\n\n'),
-        availability: formData.availability,
-        expectedSalary: formData.expectedSalary,
-        noticePeriod: formData.noticePeriod,
-        workMode: formData.workMode
-      }
-      
-      submissionData.append('application', JSON.stringify(applicationData))
-      
+      // Add form fields
+      Object.keys(formData).forEach(key => {
+        if (Array.isArray(formData[key])) {
+          formDataToSend.append(key, JSON.stringify(formData[key]))
+        } else {
+          formDataToSend.append(key, formData[key])
+        }
+      })
+
+      // Add files
       if (resumeFile) {
-        submissionData.append('resume', resumeFile)
+        formDataToSend.append('resume', resumeFile)
       }
       if (coverLetterFile) {
-        submissionData.append('coverLetter', coverLetterFile)
+        formDataToSend.append('coverLetter', coverLetterFile)
       }
+
+      const response = await applicationAPI.submitApplication(formDataToSend)
       
-      const response = await applicationAPI.submitApplication(submissionData)
-      console.log('Application submitted successfully:', response)
       setSuccess(true)
-      
-      // Store submission in localStorage as backup
-      localStorage.setItem('applicationSubmitted', 'true')
-      localStorage.setItem('applicationData', JSON.stringify(applicationData))
-      
       setTimeout(() => {
-        navigate('/careers')
+        navigate('/careers', { 
+          state: { 
+            message: 'Application submitted successfully! We will review your application and contact you soon.' 
+          }
+        })
       }, 3000)
       
     } catch (error) {
-      console.error('Application submission error:', error)
-      
-      // Handle different error types
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        setError('Unable to connect to the server. Please ensure the backend is running and try again. If the issue persists, please contact support.')
-      } else if (error.response?.status === 401) {
-        setError('Your session has expired. Please log in again.')
-        setTimeout(() => navigate('/login'), 2000)
-      } else if (error.response?.status === 400) {
-        setError(error.response?.data?.message || 'Invalid application data. Please check your form and try again.')
-      } else if (error.response?.status >= 500) {
-        setError('Server error occurred. Please try again later or contact support if the issue persists.')
-      } else {
-        setError(error.response?.data?.message || 'Failed to submit application. Please try again.')
-      }
+      setError(error.response?.data?.message || 'Failed to submit application. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  if (existingApplication) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <div className="card">
-          <div className="card-body text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-secondary-900 mb-4">
-              Application Already Submitted
-            </h2>
-            <p className="text-secondary-600 mb-8">
-              You have already submitted your application. You can view and manage it from your dashboard.
-            </p>
-            <button
-              onClick={() => navigate('/candidate/dashboard')}
-              className="btn-primary"
-            >
-              Go to Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <PersonalInfoForm
+            formData={formData}
+            onChange={handleFormDataChange}
+            errors={formErrors}
+          />
+        )
+      case 2:
+        return (
+          <SkillsForm
+            skills={formData.skills}
+            onChange={(skills) => handleFormDataChange('skills', skills)}
+            errors={formErrors}
+          />
+        )
+      case 3:
+        return (
+          <EducationForm
+            education={formData.education}
+            onChange={(education) => handleFormDataChange('education', education)}
+            errors={formErrors}
+          />
+        )
+      case 4:
+        return (
+          <FileUploadForm
+            resumeFile={resumeFile}
+            coverLetterFile={coverLetterFile}
+            onResumeChange={setResumeFile}
+            onCoverLetterChange={setCoverLetterFile}
+            errors={formErrors}
+          />
+        )
+      case 5:
+        return (
+          <JobPreferencesForm
+            formData={formData}
+            onChange={handleFormDataChange}
+            errors={formErrors}
+          />
+        )
+      default:
+        return null
+    }
   }
 
   if (success) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <div className="card">
-          <div className="card-body text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-secondary-900 mb-4">
-              Application Submitted Successfully!
-            </h2>
-            <p className="text-secondary-600 mb-8">
-              Thank you for your interest in Veridia. Your application has been received and will be reviewed by our team.
-            </p>
-            <p className="text-sm text-secondary-500 animate-pulse">
-              Redirecting to careers page...
-            </p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Application Submitted!
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Thank you for applying! We'll review your application and contact you soon.
+          </p>
+          <p className="text-sm text-gray-500">
+            Redirecting to careers page...
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto animate-fade-in">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-secondary-900 mb-2">Job Application</h1>
-        <p className="text-secondary-600">Please fill out the form below to submit your application</p>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
-          <AlertCircle className="w-5 h-5 mr-2" />
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Personal Information */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold text-secondary-900 flex items-center">
-              <User className="w-5 h-5 mr-2" />
-              Personal Information
-            </h3>
-          </div>
-          <div className="card-body space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+            <div className="flex items-center justify-between">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-secondary-700 mb-2">
-                  First Name *
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="Enter your first name"
-                />
+                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Briefcase className="w-6 h-6" />
+                  Job Application
+                </h1>
+                <p className="text-blue-100 mt-1">
+                  {existingApplication ? 'Update your application' : 'Complete your application in 5 simple steps'}
+                </p>
               </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Last Name *
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="Enter your last name"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Phone Number *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    required
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="input-field pl-10"
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="location" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Location
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="location"
-                    name="location"
-                    type="text"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="input-field pl-10"
-                    placeholder="Bangalore, Karnataka"
-                  />
-                </div>
+              <div className="text-white">
+                Step {currentStep} of {totalSteps}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Professional Profiles */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold text-secondary-900 flex items-center">
-              <Globe className="w-5 h-5 mr-2" />
-              Professional Profiles
-            </h3>
-          </div>
-          <div className="card-body space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="linkedinProfile" className="block text-sm font-medium text-secondary-700 mb-2">
-                  LinkedIn Profile
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <LinkIcon className="h-5 w-5 text-secondary-400" />
+          {/* Progress Bar */}
+          <div className="px-8 py-4 bg-gray-50 border-b">
+            <div className="flex items-center justify-between">
+              {[1, 2, 3, 4, 5].map((step) => (
+                <div key={step} className="flex items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      step <= currentStep
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {step}
                   </div>
-                  <input
-                    id="linkedinProfile"
-                    name="linkedinProfile"
-                    type="url"
-                    value={formData.linkedinProfile}
-                    onChange={handleChange}
-                    className="input-field pl-10"
-                    placeholder="https://linkedin.com/in/yourprofile"
-                  />
+                  {step < totalSteps && (
+                    <div
+                      className={`w-full h-1 mx-2 ${
+                        step < currentStep ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}
+                    />
+                  )}
                 </div>
-              </div>
-              
-              <div>
-                <label htmlFor="githubProfile" className="block text-sm font-medium text-secondary-700 mb-2">
-                  GitHub Profile
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Code className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="githubProfile"
-                    name="githubProfile"
-                    type="url"
-                    value={formData.githubProfile}
-                    onChange={handleChange}
-                    className="input-field pl-10"
-                    placeholder="https://github.com/yourusername"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="portfolioLink" className="block text-sm font-medium text-secondary-700 mb-2">
-                Portfolio/Website
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LinkIcon className="h-5 w-5 text-secondary-400" />
-                </div>
-                <input
-                  id="portfolioLink"
-                  name="portfolioLink"
-                  type="url"
-                  value={formData.portfolioLink}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="https://yourportfolio.com"
-                />
-              </div>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Skills & Expertise */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold text-secondary-900 flex items-center">
-              <Code className="w-5 h-5 mr-2" />
-              Skills & Expertise
-            </h3>
-          </div>
-          <div className="card-body">
-            <div className="space-y-4">
-              {/* Toggle Button */}
+          {/* Error Message */}
+          {error && (
+            <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="px-8 py-6">
+            {renderStepContent()}
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between items-center mt-8 pt-6 border-t">
               <button
                 type="button"
-                onClick={() => setShowSkillsSection(!showSkillsSection)}
-                className="flex items-center justify-between w-full p-4 border-2 border-dashed border-secondary-300 rounded-lg hover:border-primary-400 transition-colors bg-secondary-50 hover:bg-primary-50"
+                onClick={handlePrevious}
+                disabled={currentStep === 1}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center">
-                  <Plus className="w-5 h-5 mr-2 text-secondary-600" />
-                  <span className="text-secondary-900 font-medium">
-                    {showSkillsSection ? 'Hide Technologies' : 'Show All Technologies'}
-                  </span>
-                </div>
-                <ChevronRight className={`w-5 h-5 text-secondary-600 transition-transform ${showSkillsSection ? 'rotate-90' : ''}`} />
+                Previous
               </button>
 
-              {/* Selected Technologies Display */}
-              {formData.skills.length > 0 && (
-                <div className="p-4 bg-primary-50 rounded-lg">
-                  <h4 className="text-sm font-medium text-primary-900 mb-3">Selected Technologies ({formData.skills.length})</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800 border border-primary-200"
-                      >
-                        {skill}
-                        <button
-                          type="button"
-                          onClick={() => removeSkill(skill)}
-                          className="ml-2 text-primary-600 hover:text-primary-800"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Technologies Grid - Hidden by default */}
-              {showSkillsSection && (
-                <div className="space-y-6 animate-fade-in">
-                  {/* Programming Languages */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Programming Languages</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {['Java', 'Python', 'JavaScript', 'TypeScript', 'C++', 'C#', 'Go', 'Rust', 'Ruby', 'PHP', 'Swift', 'Kotlin', 'Scala', 'Perl', 'R'].map(lang => (
-                        <label key={lang} className="flex items-center space-x-2 cursor-pointer hover:bg-secondary-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(lang)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, skills: [...formData.skills, lang]})
-                              } else {
-                                setFormData({...formData, skills: formData.skills.filter(s => s !== lang)})
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-secondary-700">{lang}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Frontend Technologies */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Frontend Technologies</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {['React', 'Angular', 'Vue.js', 'Next.js', 'HTML5', 'CSS3', 'SASS', 'Tailwind CSS', 'Bootstrap', 'jQuery', 'Redux', 'Webpack', 'Vite', 'Ember.js', 'Svelte'].map(tech => (
-                        <label key={tech} className="flex items-center space-x-2 cursor-pointer hover:bg-secondary-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(tech)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, skills: [...formData.skills, tech]})
-                              } else {
-                                setFormData({...formData, skills: formData.skills.filter(s => s !== tech)})
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-secondary-700">{tech}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Backend Technologies */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Backend Technologies</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {['Node.js', 'Spring Boot', 'Django', 'Flask', 'Express.js', 'Ruby on Rails', 'Laravel', 'ASP.NET', 'FastAPI', 'NestJS', 'Hibernate', 'JPA', 'MyBatis', 'MVC', 'REST API'].map(tech => (
-                        <label key={tech} className="flex items-center space-x-2 cursor-pointer hover:bg-secondary-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(tech)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, skills: [...formData.skills, tech]})
-                              } else {
-                                setFormData({...formData, skills: formData.skills.filter(s => s !== tech)})
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-secondary-700">{tech}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Databases */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Databases</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {['MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'Oracle', 'SQL Server', 'SQLite', 'Cassandra', 'Elasticsearch', 'DynamoDB', 'Firebase', 'Neo4j', 'MariaDB', 'CouchDB', 'ArangoDB'].map(db => (
-                        <label key={db} className="flex items-center space-x-2 cursor-pointer hover:bg-secondary-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(db)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, skills: [...formData.skills, db]})
-                              } else {
-                                setFormData({...formData, skills: formData.skills.filter(s => s !== db)})
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-secondary-700">{db}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Cloud & DevOps */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Cloud & DevOps</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {['AWS', 'Azure', 'Google Cloud', 'Docker', 'Kubernetes', 'Jenkins', 'GitLab CI', 'GitHub Actions', 'Terraform', 'Ansible', 'Prometheus', 'Grafana', 'Nginx', 'Apache', 'Linux'].map(tech => (
-                        <label key={tech} className="flex items-center space-x-2 cursor-pointer hover:bg-secondary-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(tech)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, skills: [...formData.skills, tech]})
-                              } else {
-                                setFormData({...formData, skills: formData.skills.filter(s => s !== tech)})
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-secondary-700">{tech}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Tools & Others */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Tools & Others</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {['Git', 'Jira', 'VS Code', 'IntelliJ IDEA', 'Eclipse', 'Postman', 'Swagger', 'Figma', 'Jest', 'Cypress', 'Selenium', 'JUnit', 'Maven', 'Gradle', 'npm'].map(tool => (
-                        <label key={tool} className="flex items-center space-x-2 cursor-pointer hover:bg-secondary-50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={formData.skills.includes(tool)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, skills: [...formData.skills, tool]})
-                              } else {
-                                setFormData({...formData, skills: formData.skills.filter(s => s !== tool)})
-                              }
-                            }}
-                            className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-secondary-700">{tool}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Custom Skills */}
-                  <div>
-                    <h4 className="text-sm font-medium text-secondary-900 mb-3">Custom Skills</h4>
-                    <div className="flex gap-2 mb-3">
-                      <input
-                        type="text"
-                        value={newSkill}
-                        onChange={(e) => setNewSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                        className="input-field flex-1"
-                        placeholder="Add custom skill (e.g., Machine Learning, AI, Blockchain)"
-                      />
-                      <button
-                        type="button"
-                        onClick={addSkill}
-                        className="btn-primary px-4 py-2"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="flex justify-end pt-4 border-t border-secondary-200">
-                    <button
-                      type="button"
-                      onClick={() => setShowSkillsSection(false)}
-                      className="btn-primary inline-flex items-center"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Selection
-                      <ChevronRight className="w-4 h-4 ml-2" />
-                    </button>
-                  </div>
-                </div>
+              {currentStep < totalSteps ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Submit Application
+                    </>
+                  )}
+                </button>
               )}
             </div>
-          </div>
+          </form>
         </div>
-
-        {/* Job Preferences */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold text-secondary-900 flex items-center">
-              <Briefcase className="w-5 h-5 mr-2" />
-              Job Preferences
-            </h3>
-          </div>
-          <div className="card-body space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label htmlFor="workMode" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Work Mode
-                </label>
-                <select
-                  id="workMode"
-                  name="workMode"
-                  value={formData.workMode}
-                  onChange={handleChange}
-                  className="input-field"
-                >
-                  <option value="remote">Remote</option>
-                  <option value="hybrid">Hybrid</option>
-                  <option value="onsite">On-site</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="availability" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Availability
-                </label>
-                <select
-                  id="availability"
-                  name="availability"
-                  value={formData.availability}
-                  onChange={handleChange}
-                  className="input-field"
-                >
-                  <option value="">Select availability</option>
-                  <option value="immediate">Immediate</option>
-                  <option value="2weeks">2 weeks</option>
-                  <option value="1month">1 month</option>
-                  <option value="2months">2 months</option>
-                  <option value="3months">3+ months</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="noticePeriod" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Notice Period
-                </label>
-                <select
-                  id="noticePeriod"
-                  name="noticePeriod"
-                  value={formData.noticePeriod}
-                  onChange={handleChange}
-                  className="input-field"
-                >
-                  <option value="">Select notice period</option>
-                  <option value="none">None</option>
-                  <option value="2weeks">2 weeks</option>
-                  <option value="1month">1 month</option>
-                  <option value="2months">2 months</option>
-                  <option value="3months">3 months</option>
-                </select>
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="expectedSalary" className="block text-sm font-medium text-secondary-700 mb-2">
-                Expected Salary (Annual)
-              </label>
-              <input
-                id="expectedSalary"
-                name="expectedSalary"
-                type="text"
-                value={formData.expectedSalary}
-                onChange={handleChange}
-                className="input-field"
-                placeholder="$80,000 - $120,000"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Resume Upload */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold text-secondary-900 flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
-              Documents
-            </h3>
-          </div>
-          <div className="card-body space-y-6">
-            {/* Resume Upload */}
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Resume *
-              </label>
-              <div className="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
-                <input
-                  type="file"
-                  id="resume"
-                  accept=".pdf"
-                  onChange={(e) => handleFileChange(e, 'resume')}
-                  className="hidden"
-                />
-                <label htmlFor="resume" className="cursor-pointer">
-                  {resumeFile ? (
-                    <div className="space-y-2">
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
-                        <CheckCircle className="w-6 h-6 text-green-600" />
-                      </div>
-                      <p className="font-medium text-secondary-900">{resumeFile.name}</p>
-                      <p className="text-sm text-secondary-600">Click to change file</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-12 h-12 text-secondary-400 mx-auto" />
-                      <p className="font-medium text-secondary-900">Upload your resume</p>
-                      <p className="text-sm text-secondary-600">PDF format, max 10MB</p>
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                      >
-                        Choose File
-                      </button>
-                    </div>
-                  )}
-                </label>
-              </div>
-            </div>
-
-            {/* Cover Letter Upload */}
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Cover Letter (Optional)
-              </label>
-              <div className="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
-                <input
-                  type="file"
-                  id="coverLetter"
-                  accept=".pdf"
-                  onChange={(e) => handleFileChange(e, 'coverLetter')}
-                  className="hidden"
-                />
-                <label htmlFor="coverLetter" className="cursor-pointer">
-                  {coverLetterFile ? (
-                    <div className="space-y-2">
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
-                        <CheckCircle className="w-6 h-6 text-green-600" />
-                      </div>
-                      <p className="font-medium text-secondary-900">{coverLetterFile.name}</p>
-                      <p className="text-sm text-secondary-600">Click to change file</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <FileText className="w-12 h-12 text-secondary-400 mx-auto" />
-                      <p className="font-medium text-secondary-900">Upload your cover letter</p>
-                      <p className="text-sm text-secondary-600">PDF format, max 10MB</p>
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                      >
-                        Choose File
-                      </button>
-                    </div>
-                  )}
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/candidate/dashboard')}
-            className="btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send className="w-5 h-5 mr-2" />
-                Submit Application
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   )
 }

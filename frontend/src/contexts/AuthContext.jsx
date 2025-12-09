@@ -16,43 +16,81 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      // Verify token and get user info
-      authAPI.getCurrentUser()
-        .then(response => {
-          setUser(response.data)
-        })
-        .catch(() => {
+    // Check for existing token on mount
+    const initAuth = async () => {
+      const token = localStorage.getItem('token')
+      const storedUser = localStorage.getItem('user')
+      
+      if (token && storedUser) {
+        try {
+          // Parse stored user
+          const userData = JSON.parse(storedUser)
+          setUser(userData)
+          console.log('✅ Restored user session:', userData.email)
+        } catch (error) {
+          console.error('❌ Failed to restore session:', error)
           localStorage.removeItem('token')
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-    } else {
+          localStorage.removeItem('user')
+        }
+      }
+      
       setLoading(false)
     }
+
+    initAuth()
   }, [])
 
   const login = async (email, password) => {
     try {
+      console.log('🔐 Attempting login...')
       const response = await authAPI.login({ email, password })
-      const { data } = response.data
-      const { token, email: userEmail, name, role } = data
       
-      localStorage.setItem('token', token)
-      setUser({ email: userEmail, name, role })
+      // Handle the response structure from your backend
+      const { data } = response
       
-      return { success: true }
+      // Check if the response has the expected structure
+      if (!data) {
+        throw new Error('Invalid response from server')
+      }
+      
+      // Your backend returns: { success: true, message: "...", data: { token, email, name, role } }
+      const authData = data.data || data
+      
+      if (!authData.token) {
+        throw new Error('No token received from server')
+      }
+      
+      // Store token
+      localStorage.setItem('token', authData.token)
+      
+      // Create user object
+      const userData = {
+        email: authData.email,
+        name: authData.name,
+        role: authData.role
+      }
+      
+      // Store user
+      localStorage.setItem('user', JSON.stringify(userData))
+      setUser(userData)
+      
+      console.log('✅ Login successful:', userData.email)
+      
+      return { 
+        success: true,
+        user: userData
+      }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('❌ Login error:', error)
+      
       let errorMessage = 'Login failed'
-      if (error.response?.data) {
-        if (error.response.data.message) {
-          errorMessage = error.response.data.message
-        }
+      
+      if (error.message) {
+        errorMessage = error.message
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
       } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        errorMessage = 'Cannot connect to server. Please check if the backend is running.'
+        errorMessage = 'Cannot connect to server. Please check if the backend is running on port 8080.'
       }
       
       return { 
@@ -64,23 +102,28 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
+      console.log('📝 Attempting registration...')
       const response = await authAPI.register({ name, email, password })
-      const { message } = response.data
       
-      // Don't auto-login after registration, just return success
+      const { data } = response
+      
+      console.log('✅ Registration successful')
+      
       return { 
         success: true, 
-        message: message || 'Registration successful. Please login with your credentials.'
+        message: data.message || 'Registration successful. Please login with your credentials.'
       }
     } catch (error) {
-      console.error('Registration error:', error)
+      console.error('❌ Registration error:', error)
+      
       let errorMessage = 'Registration failed'
-      if (error.response?.data) {
-        if (error.response.data.message) {
-          errorMessage = error.response.data.message
-        }
+      
+      if (error.message) {
+        errorMessage = error.message
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
       } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        errorMessage = 'Cannot connect to server. Please check if the backend is running.'
+        errorMessage = 'Cannot connect to server. Please check if the backend is running on port 8080.'
       }
       
       return { 
@@ -91,7 +134,9 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = () => {
+    console.log('👋 Logging out...')
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     setUser(null)
   }
 

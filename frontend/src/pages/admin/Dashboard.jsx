@@ -16,6 +16,7 @@ import {
   UserCheck,
   Briefcase
 } from 'lucide-react'
+import '../../styles/Applications.css'
 
 const AdminDashboard = () => {
   const [applications, setApplications] = useState([])

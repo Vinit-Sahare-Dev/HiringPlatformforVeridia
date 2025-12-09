@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { candidateAPI } from '../../services/api'
 import { User, Mail, Save, Briefcase, Camera, Upload, X } from 'lucide-react'
+import '../../styles/Applications.css'
 
 const Profile = () => {
   const { user, logout } = useAuth()

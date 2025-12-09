@@ -22,6 +22,7 @@ import {
   Users,
   Bell
 } from 'lucide-react'
+import '../../styles/Applications.css'
 
 const Dashboard = () => {
   const [application, setApplication] = useState(null)
