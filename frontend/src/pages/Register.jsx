@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Eye, EyeOff, Mail, Lock, User, Briefcase } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, Briefcase, Shield, ArrowRight, Check } from 'lucide-react'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +14,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   const { register } = useAuth()
   const navigate = useNavigate()
@@ -31,6 +32,8 @@ const Register = () => {
     
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required'
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters'
     }
     
     if (!formData.email.trim()) {
@@ -41,12 +44,18 @@ const Register = () => {
     
     if (!formData.password) {
       newErrors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters'
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain uppercase, lowercase, and number'
     }
     
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match'
+    }
+
+    if (!agreeToTerms) {
+      newErrors.terms = 'You must agree to the terms and conditions'
     }
     
     return newErrors
@@ -78,186 +87,347 @@ const Register = () => {
     setLoading(false)
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full space-y-8 animate-slide-up">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center">
-              <Briefcase className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold text-secondary-900 mb-2">
-            Create Your Account
-          </h2>
-          <p className="text-secondary-600">
-            Join Veridia and start your career journey
-          </p>
-        </div>
+  const passwordStrength = (password) => {
+    if (!password) return { strength: 0, text: '', color: '' }
+    
+    let strength = 0
+    if (password.length >= 8) strength++
+    if (password.length >= 12) strength++
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++
+    if (/\d/.test(password)) strength++
+    if (/[^a-zA-Z\d]/.test(password)) strength++
+    
+    const levels = [
+      { text: 'Very Weak', color: 'text-red-500' },
+      { text: 'Weak', color: 'text-orange-500' },
+      { text: 'Fair', color: 'text-yellow-500' },
+      { text: 'Good', color: 'text-blue-500' },
+      { text: 'Strong', color: 'text-green-500' }
+    ]
+    
+    return { strength, ...levels[strength] }
+  }
 
-        {/* Register Form */}
-        <div className="card">
-          <div className="card-body">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {errors.general && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {errors.general}
+  const strength = passwordStrength(formData.password)
+
+  return (
+    <div className="auth-layout">
+      <div className="auth-container">
+        {/* Background Elements */}
+        <div className="auth-background">
+          <div className="auth-pattern"></div>
+        </div>
+        
+        {/* Register Card */}
+        <div className="auth-card">
+          {/* Header */}
+          <div className="auth-header">
+            <div className="auth-logo">
+              <Briefcase className="w-8 h-8" />
+            </div>
+            <h1 className="auth-title">Create Your Account</h1>
+            <p className="auth-subtitle">
+              Join Veridia and start your career journey with thousands of opportunities
+            </p>
+          </div>
+
+          {/* Register Form */}
+          <form onSubmit={handleSubmit} className="auth-form">
+            {errors.general && (
+              <div className="auth-alert auth-alert-error">
+                {errors.general}
+              </div>
+            )}
+
+            {/* Name Field */}
+            <div className="auth-form-group">
+              <label htmlFor="name" className="auth-label">
+                Full Name
+              </label>
+              <div className="auth-input-wrapper">
+                <User className="auth-input-icon" />
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`auth-input ${errors.name ? 'auth-input-error' : ''}`}
+                  placeholder="Enter your full name"
+                  autoComplete="name"
+                />
+              </div>
+              {errors.name && (
+                <p className="auth-error-text">{errors.name}</p>
+              )}
+            </div>
+
+            {/* Email Field */}
+            <div className="auth-form-group">
+              <label htmlFor="email" className="auth-label">
+                Email Address
+              </label>
+              <div className="auth-input-wrapper">
+                <Mail className="auth-input-icon" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`auth-input ${errors.email ? 'auth-input-error' : ''}`}
+                  placeholder="Enter your email address"
+                  autoComplete="email"
+                />
+              </div>
+              {errors.email && (
+                <p className="auth-error-text">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div className="auth-form-group">
+              <label htmlFor="password" className="auth-label">
+                Password
+              </label>
+              <div className="auth-input-wrapper">
+                <Lock className="auth-input-icon" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`auth-input ${errors.password ? 'auth-input-error' : ''}`}
+                  placeholder="Create a strong password"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="auth-password-toggle"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <div className="auth-password-strength">
+                  <div className="auth-password-strength-bar">
+                    <div 
+                      className={`auth-password-strength-fill ${strength.color.replace('text-', 'bg-')}`}
+                      style={{ width: `${(strength.strength / 5) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className={`auth-password-strength-text ${strength.color}`}>
+                    Password strength: {strength.text}
+                  </span>
                 </div>
               )}
-
-              {/* Name Field */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={`input-field pl-10 ${errors.name ? 'border-red-300 focus:ring-red-500' : ''}`}
-                    placeholder="Enter your full name"
-                  />
+              
+              {/* Password Requirements */}
+              <div className="auth-password-requirements">
+                <div className={`auth-requirement ${formData.password.length >= 8 ? 'auth-requirement-met' : ''}`}>
+                  <Check className="w-3 h-3" />
+                  At least 8 characters
                 </div>
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                )}
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`input-field pl-10 ${errors.email ? 'border-red-300 focus:ring-red-500' : ''}`}
-                    placeholder="Enter your email"
-                  />
+                <div className={`auth-requirement ${/[a-z]/.test(formData.password) && /[A-Z]/.test(formData.password) ? 'auth-requirement-met' : ''}`}>
+                  <Check className="w-3 h-3" />
+                  Uppercase and lowercase
                 </div>
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={`input-field pl-10 pr-10 ${errors.password ? 'border-red-300 focus:ring-red-500' : ''}`}
-                    placeholder="Create a password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-secondary-400 hover:text-secondary-600" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-secondary-400 hover:text-secondary-600" />
-                    )}
-                  </button>
+                <div className={`auth-requirement ${/\d/.test(formData.password) ? 'auth-requirement-met' : ''}`}>
+                  <Check className="w-3 h-3" />
+                  At least one number
                 </div>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
               </div>
+              
+              {errors.password && (
+                <p className="auth-error-text">{errors.password}</p>
+              )}
+            </div>
 
-              {/* Confirm Password Field */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-secondary-700 mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-secondary-400" />
-                  </div>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`input-field pl-10 pr-10 ${errors.confirmPassword ? 'border-red-300 focus:ring-red-500' : ''}`}
-                    placeholder="Confirm your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-secondary-400 hover:text-secondary-600" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-secondary-400 hover:text-secondary-600" />
-                    )}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-                )}
+            {/* Confirm Password Field */}
+            <div className="auth-form-group">
+              <label htmlFor="confirmPassword" className="auth-label">
+                Confirm Password
+              </label>
+              <div className="auth-input-wrapper">
+                <Lock className="auth-input-icon" />
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`auth-input ${errors.confirmPassword ? 'auth-input-error' : ''}`}
+                  placeholder="Confirm your password"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="auth-password-toggle"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="auth-error-text">{errors.confirmPassword}</p>
+              )}
+            </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Creating Account...
-                  </div>
-                ) : (
-                  'Create Account'
-                )}
-              </button>
-            </form>
+            {/* Terms and Conditions */}
+            <div className="auth-checkbox-group">
+              <label className="auth-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={agreeToTerms}
+                  onChange={(e) => setAgreeToTerms(e.target.checked)}
+                  className="auth-checkbox"
+                />
+                <span className="auth-checkbox-text">
+                  I agree to the{' '}
+                  <Link to="/terms" className="auth-link">
+                    Terms and Conditions
+                  </Link>
+                  {' '}and{' '}
+                  <Link to="/privacy" className="auth-link">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+              {errors.terms && (
+                <p className="auth-error-text">{errors.terms}</p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="auth-button"
+            >
+              {loading ? (
+                <>
+                  <div className="auth-spinner"></div>
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Create Account
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="auth-divider">
+            <div className="auth-divider-line"></div>
+            <span className="auth-divider-text">or sign up with</span>
+            <div className="auth-divider-line"></div>
+          </div>
+
+          {/* Social Signup */}
+          <div className="auth-social">
+            <button className="auth-social-button">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Sign up with Google
+            </button>
+          </div>
+
+          {/* Footer Links */}
+          <div className="auth-footer">
+            <div className="auth-footer-section">
+              <p className="auth-footer-text">
+                Already have an account?{' '}
+                <Link to="/login" className="auth-footer-link">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+            
+            <div className="auth-footer-section">
+              <p className="auth-footer-text">
+                Are you an administrator?{' '}
+                <Link to="/admin/login" className="auth-footer-link">
+                  Admin Login
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Login Link */}
-        <div className="text-center">
-          <p className="text-sm text-secondary-600">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="text-primary-600 hover:text-primary-700 font-medium"
-            >
-              Sign in
-            </Link>
-          </p>
+        {/* Side Content */}
+        <div className="auth-side-content">
+          <div className="auth-side-content-inner">
+            <h2 className="auth-side-title">
+              Join Thousands of Professionals on Veridia
+            </h2>
+            <p className="auth-side-description">
+              Create your account today and access exclusive job opportunities, career resources, and professional networking.
+            </p>
+            
+            <div className="auth-features">
+              <div className="auth-feature">
+                <div className="auth-feature-icon">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="auth-feature-title">500+ Companies</h3>
+                  <p className="auth-feature-description">Top companies hiring talent</p>
+                </div>
+              </div>
+              
+              <div className="auth-feature">
+                <div className="auth-feature-icon">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="auth-feature-title">Secure Platform</h3>
+                  <p className="auth-feature-description">Your data is protected with encryption</p>
+                </div>
+              </div>
+              
+              <div className="auth-feature">
+                <div className="auth-feature-icon">
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="auth-feature-title">Easy Apply</h3>
+                  <p className="auth-feature-description">One-click applications to dream jobs</p>
+                </div>
+              </div>
+              
+              <div className="auth-feature">
+                <div className="auth-feature-icon">
+                  <Check className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="auth-feature-title">Free Account</h3>
+                  <p className="auth-feature-description">No hidden fees or charges</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

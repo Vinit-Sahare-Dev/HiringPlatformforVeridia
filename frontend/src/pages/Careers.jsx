@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   MapPin, 
@@ -23,23 +23,26 @@ import {
   Shield,
   Globe2,
   Brain,
-  Lightbulb
+  Lightbulb,
+  Bookmark,
+  Share2,
+  Eye,
+  Timer
 } from 'lucide-react'
 
 const Careers = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedLocation, setSelectedLocation] = useState('all')
+  const [selectedType, setSelectedType] = useState('all')
+  const [selectedExperience, setSelectedExperience] = useState('all')
   const [hoveredJob, setHoveredJob] = useState(null)
-  const [animatedStats, setAnimatedStats] = useState(false)
-  const [visibleJobs, setVisibleJobs] = useState(6)
+  const [savedJobs, setSavedJobs] = useState(new Set())
+  const [sortBy, setSortBy] = useState('newest')
+  const [visibleJobs, setVisibleJobs] = useState(9)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    setAnimatedStats(true)
-  }, [])
-
-  const jobs = [
+  const jobs = useMemo(() => [
     {
       id: 1,
       title: 'Senior Frontend Developer',
@@ -49,11 +52,17 @@ const Careers = () => {
       experience: '5+ years',
       salary: '$120k - $180k',
       category: 'engineering',
-      description: 'Build amazing user interfaces and help shape the future of our platform.',
+      level: 'Senior',
+      description: 'Build amazing user interfaces and help shape the future of our platform. Work with cutting-edge technologies and collaborate with world-class engineers.',
       requirements: ['React', 'TypeScript', 'Node.js', '5+ years experience'],
+      responsibilities: ['Develop responsive web applications', 'Collaborate with design team', 'Optimize application performance', 'Mentor junior developers'],
+      benefits: ['Stock options', 'Flexible work hours', 'Professional development budget', 'Health insurance'],
       posted: '2 days ago',
+      postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       applicants: 45,
-      featured: true
+      featured: true,
+      views: 1250,
+      matchScore: 95
     },
     {
       id: 2,
@@ -64,11 +73,17 @@ const Careers = () => {
       experience: '3-5 years',
       salary: '$100k - $150k',
       category: 'product',
-      description: 'Drive product strategy and work with cross-functional teams to deliver exceptional products.',
+      level: 'Mid-level',
+      description: 'Drive product strategy and work with cross-functional teams to deliver exceptional products that users love.',
       requirements: ['Product strategy', 'Data analysis', 'Leadership', '3+ years experience'],
+      responsibilities: ['Define product roadmap', 'Conduct user research', 'Analyze market trends', 'Collaborate with engineering'],
+      benefits: ['Performance bonuses', 'Remote work options', 'Learning stipend', 'Gym membership'],
       posted: '1 week ago',
+      postedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       applicants: 32,
-      featured: true
+      featured: true,
+      views: 890,
+      matchScore: 88
     },
     {
       id: 3,
@@ -79,11 +94,17 @@ const Careers = () => {
       experience: '3-5 years',
       salary: '$100k - $160k',
       category: 'engineering',
-      description: 'Design and implement scalable backend systems and APIs.',
+      level: 'Mid-level',
+      description: 'Design and implement scalable backend systems and APIs that power our platform.',
       requirements: ['Java', 'Spring Boot', 'Microservices', '3+ years experience'],
+      responsibilities: ['Build RESTful APIs', 'Design database schemas', 'Implement security measures', 'Optimize system performance'],
+      benefits: ['Stock options', 'Flexible schedule', 'Tech conferences', 'Health benefits'],
       posted: '3 days ago',
+      postedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
       applicants: 28,
-      featured: false
+      featured: false,
+      views: 650,
+      matchScore: 82
     },
     {
       id: 4,
@@ -94,11 +115,17 @@ const Careers = () => {
       experience: '2-4 years',
       salary: '$80k - $120k',
       category: 'design',
-      description: 'Create beautiful and intuitive user experiences.',
-      requirements: ['Figma', 'User research', 'Prototyping', '2+4 years experience'],
+      level: 'Mid-level',
+      description: 'Create beautiful and intuitive user experiences that delight our users.',
+      requirements: ['Figma', 'User research', 'Prototyping', '2+ years experience'],
+      responsibilities: ['Design user interfaces', 'Conduct usability tests', 'Create design systems', 'Collaborate with developers'],
+      benefits: ['Creative freedom', 'Design tools budget', 'Flexible hours', 'Wellness program'],
       posted: '5 days ago',
+      postedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       applicants: 19,
-      featured: false
+      featured: false,
+      views: 420,
+      matchScore: 75
     },
     {
       id: 5,
@@ -109,11 +136,17 @@ const Careers = () => {
       experience: '4-6 years',
       salary: '$110k - $170k',
       category: 'data',
-      description: 'Apply machine learning and statistical analysis to solve complex problems.',
+      level: 'Senior',
+      description: 'Apply machine learning and statistical analysis to solve complex business problems.',
       requirements: ['Python', 'Machine Learning', 'Statistics', '4+ years experience'],
+      responsibilities: ['Build ML models', 'Analyze datasets', 'Present insights', 'Collaborate with stakeholders'],
+      benefits: ['Research budget', 'Conference attendance', 'Flexible work', 'Stock options'],
       posted: '1 day ago',
+      postedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       applicants: 52,
-      featured: true
+      featured: true,
+      views: 1580,
+      matchScore: 92
     },
     {
       id: 6,
@@ -124,43 +157,180 @@ const Careers = () => {
       experience: '3-5 years',
       salary: '$70k - $100k',
       category: 'marketing',
-      description: 'Lead marketing campaigns and drive brand growth.',
+      level: 'Mid-level',
+      description: 'Lead marketing campaigns and drive brand growth in the competitive tech landscape.',
       requirements: ['Digital marketing', 'Content strategy', 'Analytics', '3+ years experience'],
+      responsibilities: ['Develop marketing strategies', 'Manage campaigns', 'Analyze performance', 'Lead marketing team'],
+      benefits: ['Performance bonuses', 'Creative budget', 'Remote options', 'Professional development'],
       posted: '1 week ago',
+      postedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       applicants: 24,
-      featured: false
+      featured: false,
+      views: 380,
+      matchScore: 78
+    },
+    {
+      id: 7,
+      title: 'DevOps Engineer',
+      department: 'Engineering',
+      location: 'Bangalore',
+      type: 'Full-time',
+      experience: '4-6 years',
+      salary: '$110k - $160k',
+      category: 'engineering',
+      level: 'Senior',
+      description: 'Build and maintain CI/CD pipelines and infrastructure for scalable applications.',
+      requirements: ['Docker', 'Kubernetes', 'AWS', '4+ years experience'],
+      responsibilities: ['Manage cloud infrastructure', 'Implement CI/CD', 'Monitor systems', 'Automate deployments'],
+      benefits: ['Cloud certifications', 'On-call compensation', 'Flexible schedule', 'Stock options'],
+      posted: '4 days ago',
+      postedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      applicants: 31,
+      featured: false,
+      views: 720,
+      matchScore: 85
+    },
+    {
+      id: 8,
+      title: 'Content Strategist',
+      department: 'Marketing',
+      location: 'Remote',
+      type: 'Full-time',
+      experience: '2-4 years',
+      salary: '$60k - $90k',
+      category: 'marketing',
+      level: 'Mid-level',
+      description: 'Create compelling content strategies that engage and convert our target audience.',
+      requirements: ['Content writing', 'SEO', 'Analytics', '2+ years experience'],
+      responsibilities: ['Develop content calendar', 'Write blog posts', 'Optimize for SEO', 'Analyze content performance'],
+      benefits: ['Remote work', 'Creative freedom', 'Learning budget', 'Flexible hours'],
+      posted: '6 days ago',
+      postedDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+      applicants: 15,
+      featured: false,
+      views: 290,
+      matchScore: 71
+    },
+    {
+      id: 9,
+      title: 'Full Stack Developer',
+      department: 'Engineering',
+      location: 'Bangalore / Hybrid',
+      type: 'Full-time',
+      experience: '3-5 years',
+      salary: '$90k - $140k',
+      category: 'engineering',
+      level: 'Mid-level',
+      description: 'Work across the full stack to build features from database to user interface.',
+      requirements: ['React', 'Node.js', 'MongoDB', '3+ years experience'],
+      responsibilities: ['Develop full-stack features', 'Design APIs', 'Optimize performance', 'Collaborate with teams'],
+      benefits: ['Stock options', 'Flexible work', 'Learning budget', 'Health insurance'],
+      posted: '2 days ago',
+      postedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      applicants: 38,
+      featured: false,
+      views: 980,
+      matchScore: 87
     }
-  ]
+  ], [])
 
-  const categories = [
-    { id: 'all', name: 'All Positions', count: jobs.length },
-    { id: 'engineering', name: 'Engineering', count: jobs.filter(j => j.category === 'engineering').length },
-    { id: 'product', name: 'Product', count: jobs.filter(j => j.category === 'product').length },
-    { id: 'design', name: 'Design', count: jobs.filter(j => j.category === 'design').length },
-    { id: 'data', name: 'Data', count: jobs.filter(j => j.category === 'data').length },
-    { id: 'marketing', name: 'Marketing', count: jobs.filter(j => j.category === 'marketing').length }
-  ]
+  const categories = useMemo(() => [
+    { id: 'all', name: 'All Positions', count: jobs.length, icon: Briefcase },
+    { id: 'engineering', name: 'Engineering', count: jobs.filter(j => j.category === 'engineering').length, icon: Brain },
+    { id: 'product', name: 'Product', count: jobs.filter(j => j.category === 'product').length, icon: Target },
+    { id: 'design', name: 'Design', count: jobs.filter(j => j.category === 'design').length, icon: Lightbulb },
+    { id: 'data', name: 'Data', count: jobs.filter(j => j.category === 'data').length, icon: Globe2 },
+    { id: 'marketing', name: 'Marketing', count: jobs.filter(j => j.category === 'marketing').length, icon: Rocket }
+  ], [jobs])
 
-  const locations = [
+  const locations = useMemo(() => [
     { id: 'all', name: 'All Locations' },
     { id: 'remote', name: 'Remote' },
     { id: 'bangalore', name: 'Bangalore' },
     { id: 'hyderabad', name: 'Hyderabad' },
     { id: 'pune', name: 'Pune' }
-  ]
+  ], [])
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory
-    const matchesLocation = selectedLocation === 'all' || 
-                           (selectedLocation === 'remote' && job.location.includes('Remote')) ||
-                           (selectedLocation === 'bangalore' && job.location.includes('Bangalore')) ||
-                           (selectedLocation === 'hyderabad' && job.location.includes('Hyderabad')) ||
-                           (selectedLocation === 'pune' && job.location.includes('Pune'))
-    
-    return matchesSearch && matchesCategory && matchesLocation
-  })
+  const jobTypes = useMemo(() => [
+    { id: 'all', name: 'All Types' },
+    { id: 'full-time', name: 'Full-time' },
+    { id: 'part-time', name: 'Part-time' },
+    { id: 'contract', name: 'Contract' },
+    { id: 'internship', name: 'Internship' }
+  ], [])
+
+  const experienceLevels = useMemo(() => [
+    { id: 'all', name: 'All Levels' },
+    { id: 'entry', name: 'Entry Level (0-2 years)' },
+    { id: 'mid', name: 'Mid Level (2-5 years)' },
+    { id: 'senior', name: 'Senior (5+ years)' },
+    { id: 'lead', name: 'Lead/Principal (8+ years)' }
+  ], [])
+
+  const filteredJobs = useMemo(() => {
+    let filtered = jobs.filter(job => {
+      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           job.requirements.some(req => req.toLowerCase().includes(searchTerm.toLowerCase()))
+      const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory
+      const matchesLocation = selectedLocation === 'all' || 
+                             (selectedLocation === 'remote' && job.location.includes('Remote')) ||
+                             (selectedLocation === 'bangalore' && job.location.includes('Bangalore')) ||
+                             (selectedLocation === 'hyderabad' && job.location.includes('Hyderabad')) ||
+                             (selectedLocation === 'pune' && job.location.includes('Pune'))
+      const matchesType = selectedType === 'all' || job.type.toLowerCase().includes(selectedType.replace('-', ' '))
+      const matchesExperience = selectedExperience === 'all' || 
+                               (selectedExperience === 'entry' && job.level === 'Entry Level') ||
+                               (selectedExperience === 'mid' && job.level === 'Mid-level') ||
+                               (selectedExperience === 'senior' && job.level === 'Senior') ||
+                               (selectedExperience === 'lead' && job.level === 'Lead/Principal')
+      
+      return matchesSearch && matchesCategory && matchesLocation && matchesType && matchesExperience
+    })
+
+    // Sort jobs
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return b.postedDate - a.postedDate
+        case 'salary':
+          const aSalary = parseInt(a.salary.split('-')[1].replace(/[^0-9]/g, ''))
+          const bSalary = parseInt(b.salary.split('-')[1].replace(/[^0-9]/g, ''))
+          return bSalary - aSalary
+        case 'applicants':
+          return b.applicants - a.applicants
+        case 'match':
+          return b.matchScore - a.matchScore
+        default:
+          return 0
+      }
+    })
+
+    return filtered
+  }, [jobs, searchTerm, selectedCategory, selectedLocation, selectedType, selectedExperience, sortBy])
+
+  const toggleSaveJob = (jobId) => {
+    const newSavedJobs = new Set(savedJobs)
+    if (newSavedJobs.has(jobId)) {
+      newSavedJobs.delete(jobId)
+    } else {
+      newSavedJobs.add(jobId)
+    }
+    setSavedJobs(newSavedJobs)
+  }
+
+  const shareJob = (job) => {
+    if (navigator.share) {
+      navigator.share({
+        title: job.title,
+        text: job.description,
+        url: window.location.href
+      })
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href)
+    }
+  }
 
   const benefits = [
     { icon: Heart, title: 'Health & Wellness', description: 'Comprehensive medical, dental, and vision insurance', gradient: 'from-pink-500 to-rose-500' },
@@ -172,237 +342,351 @@ const Careers = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
+    <div className="careers-page">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary-600 to-secondary-600 text-white overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+      <section className="careers-hero">
+        <div className="hero-background">
+          <div className="hero-pattern"></div>
+        </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium mb-6 animate-pulse">
-              <Sparkles className="w-4 h-4 mr-2" />
+        <div className="section-container">
+          <div className="careers-hero-content">
+            <div className="careers-badge">
+              <Sparkles className="w-4 h-4" />
               Now Hiring: Join Our Amazing Team
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-slide-up">
-              Build Your Career at <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-primary-100">Veridia</span>
+            
+            <h1 className="careers-title">
+              Build Your Career at <span className="text-gradient">Veridia</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-primary-100 max-w-3xl mx-auto animate-slide-up" style={{animationDelay: '200ms'}}>
+            
+            <p className="careers-subtitle">
               Join our team of innovators, creators, and problem-solvers. 
               Together, we're building the future of hiring technology.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 animate-slide-up" style={{animationDelay: '400ms'}}>
-              <div className="flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/30 hover:bg-white/30 transition-all duration-300">
+            
+            <div className="careers-stats">
+              <div className="stat-item">
                 <Building className="w-5 h-5" />
                 <span>500+ Employees</span>
               </div>
-              <div className="flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/30 hover:bg-white/30 transition-all duration-300">
+              <div className="stat-item">
                 <Star className="w-5 h-5" />
                 <span>4.8 Rating</span>
               </div>
-              <div className="flex items-center justify-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/30 hover:bg-white/30 transition-all duration-300">
+              <div className="stat-item">
                 <MapPin className="w-5 h-5" />
                 <span>Indian Locations</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Benefits Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-secondary-900 mb-4">Why Join Veridia?</h2>
-          <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
-            We offer competitive benefits and a culture that supports your growth and well-being.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {benefits.map((benefit, index) => (
-            <div key={index} className="card p-6 text-center hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group cursor-pointer">
-              <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${benefit.gradient} rounded-full mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                <benefit.icon className="w-8 h-8 text-white" />
+      <section className="careers-benefits">
+        <div className="section-container">
+          <div className="section-header">
+            <h2 className="section-title">Why Join Veridia?</h2>
+            <p className="section-subtitle">
+              We offer competitive benefits and a culture that supports your growth and well-being.
+            </p>
+          </div>
+          
+          <div className="benefits-grid">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="benefit-card">
+                <div className={`benefit-icon ${benefit.gradient}`}>
+                  <benefit.icon className="w-8 h-8" />
+                </div>
+                <h3 className="benefit-title">{benefit.title}</h3>
+                <p className="benefit-description">{benefit.description}</p>
               </div>
-              <h3 className="text-xl font-semibold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">{benefit.title}</h3>
-              <p className="text-secondary-600">{benefit.description}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Job Listings Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-secondary-900 mb-4">Open Positions</h2>
-          <p className="text-lg text-secondary-600">
-            Find your perfect role and help us shape the future of hiring.
-          </p>
-        </div>
+      <section className="careers-listings">
+        <div className="section-container">
+          <div className="section-header">
+            <h2 className="section-title">Open Positions</h2>
+            <p className="section-subtitle">
+              Find your perfect role and help us shape the future of hiring.
+            </p>
+          </div>
 
-        {/* Filters */}
-        <div className="card mb-8">
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Filters */}
+          <div className="careers-filters">
+            <div className="filters-header">
+              <Filter className="w-5 h-5" />
+              <span>Filter Jobs</span>
+            </div>
+            
+            <div className="filters-grid">
               {/* Search */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-secondary-400" />
+              <div className="filter-group">
+                <div className="filter-input-wrapper">
+                  <Search className="w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search jobs, skills, or keywords..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="filter-input"
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Search jobs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input-field pl-10"
-                />
               </div>
 
               {/* Category Filter */}
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="input-field"
-              >
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name} ({category.count})
-                  </option>
-                ))}
-              </select>
+              <div className="filter-group">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="filter-select"
+                >
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name} ({category.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Location Filter */}
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="input-field"
-              >
-                {locations.map(location => (
-                  <option key={location.id} value={location.id}>
-                    {location.name}
-                  </option>
-                ))}
-              </select>
+              <div className="filter-group">
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="filter-select"
+                >
+                  {locations.map(location => (
+                    <option key={location.id} value={location.id}>
+                      {location.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Type Filter */}
+              <div className="filter-group">
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="filter-select"
+                >
+                  {jobTypes.map(type => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Experience Filter */}
+              <div className="filter-group">
+                <select
+                  value={selectedExperience}
+                  onChange={(e) => setSelectedExperience(e.target.value)}
+                  className="filter-select"
+                >
+                  {experienceLevels.map(level => (
+                    <option key={level.id} value={level.id}>
+                      {level.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sort */}
+              <div className="filter-group">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="salary">Highest Salary</option>
+                  <option value="applicants">Most Applicants</option>
+                  <option value="match">Best Match</option>
+                </select>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Job Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8">
-          {filteredJobs.slice(0, visibleJobs).map((job) => (
-            <div 
-              key={job.id} 
-              className={`card hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group relative overflow-hidden ${
-                job.featured ? 'ring-2 ring-primary-500' : ''
-              }`}
-              onMouseEnter={() => setHoveredJob(job.id)}
-              onMouseLeave={() => setHoveredJob(null)}
-            >
-              {job.featured && (
-                <div className="absolute -top-2 -right-2 z-10">
-                  <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
-                    <Star className="w-3 h-3 inline mr-1" />
+          {/* Results Summary */}
+          <div className="careers-results">
+            <p className="results-count">
+              Showing <span>{filteredJobs.length}</span> positions
+              {filteredJobs.length !== jobs.length && ` of ${jobs.length}`}
+            </p>
+            <div className="results-actions">
+              <button className="results-action-btn">
+                <Bookmark className="w-4 h-4" />
+                Saved Jobs ({savedJobs.size})
+              </button>
+            </div>
+          </div>
+
+          {/* Job Cards */}
+          <div className="careers-grid">
+            {filteredJobs.slice(0, visibleJobs).map((job) => (
+              <div 
+                key={job.id} 
+                className={`job-card ${job.featured ? 'job-card-featured' : ''}`}
+                onMouseEnter={() => setHoveredJob(job.id)}
+                onMouseLeave={() => setHoveredJob(null)}
+              >
+                {job.featured && (
+                  <div className="job-featured-badge">
+                    <Star className="w-3 h-3" />
                     Featured
                   </div>
-                </div>
-              )}
-              
-              {/* Background Gradient Overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-br from-primary-500/5 to-secondary-500/5 transition-opacity duration-300 ${
-                hoveredJob === job.id ? 'opacity-100' : 'opacity-0'
-              }`}></div>
-              
-              <div className="p-6 relative z-10">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">
-                    {job.title}
-                  </h3>
-                  <p className="text-secondary-600 text-sm line-clamp-2">{job.description}</p>
+                )}
+                
+                <div className="job-header">
+                  <div className="job-title-section">
+                    <h3 className="job-title">{job.title}</h3>
+                    <div className="job-meta">
+                      <span className="job-department">{job.department}</span>
+                      <span className="job-level">{job.level}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="job-actions">
+                    <button 
+                      onClick={() => toggleSaveJob(job.id)}
+                      className={`job-action-btn ${savedJobs.has(job.id) ? 'job-action-saved' : ''}`}
+                      title={savedJobs.has(job.id) ? 'Remove from saved' : 'Save job'}
+                    >
+                      <Bookmark className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => shareJob(job)}
+                      className="job-action-btn"
+                      title="Share job"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-secondary-600">
-                    <Briefcase className="w-4 h-4 text-primary-500" />
-                    <span>{job.department}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-secondary-600">
-                    <MapPin className="w-4 h-4 text-primary-500" />
+                <p className="job-description">{job.description}</p>
+                
+                <div className="job-details">
+                  <div className="job-detail">
+                    <MapPin className="w-4 h-4" />
                     <span>{job.location}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-secondary-600">
-                    <Clock className="w-4 h-4 text-primary-500" />
+                  <div className="job-detail">
+                    <Clock className="w-4 h-4" />
                     <span>{job.type}</span>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-secondary-100">
-                  <div className="text-sm">
-                    <span className="text-primary-600 font-semibold">{job.salary}</span>
-                    <span className="text-secondary-500 ml-2">• {job.experience}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-secondary-500">
-                    <Users className="w-3 h-3" />
-                    <span>{job.applicants} applied</span>
+                  <div className="job-detail">
+                    <Timer className="w-4 h-4" />
+                    <span>{job.experience}</span>
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="job-salary">
+                  <span className="salary-amount">{job.salary}</span>
+                  <div className="job-stats">
+                    <div className="job-stat">
+                      <Users className="w-3 h-3" />
+                      <span>{job.applicants} applied</span>
+                    </div>
+                    <div className="job-stat">
+                      <Eye className="w-3 h-3" />
+                      <span>{job.views} views</span>
+                    </div>
+                  </div>
+                </div>
+
+                {job.matchScore && (
+                  <div className="job-match">
+                    <div className="match-bar">
+                      <div 
+                        className="match-fill" 
+                        style={{ width: `${job.matchScore}%` }}
+                      ></div>
+                    </div>
+                    <span className="match-text">{job.matchScore}% match</span>
+                  </div>
+                )}
+
+                <div className="job-footer">
                   <button 
                     onClick={() => navigate('/candidate/apply')}
-                    className="w-full btn-primary group-hover:shadow-lg transition-all duration-300 flex items-center justify-center group-hover:scale-105"
+                    className="job-apply-btn"
                   >
                     Apply Now
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
+            ))}
+          </div>
+
+          {filteredJobs.length === 0 && (
+            <div className="careers-empty">
+              <div className="empty-icon">
+                <Search className="w-12 h-12" />
+              </div>
+              <h3 className="empty-title">No positions found</h3>
+              <p className="empty-description">
+                Try adjusting your search criteria or check back later for new opportunities.
+              </p>
+              <button 
+                onClick={() => {
+                  setSearchTerm('')
+                  setSelectedCategory('all')
+                  setSelectedLocation('all')
+                  setSelectedType('all')
+                  setSelectedExperience('all')
+                }}
+                className="empty-reset-btn"
+              >
+                Clear Filters
+              </button>
             </div>
-          ))}
+          )}
+
+          {/* Load More Button */}
+          {filteredJobs.length > visibleJobs && (
+            <div className="careers-load-more">
+              <button
+                onClick={() => setVisibleJobs(prev => prev + 6)}
+                className="load-more-btn"
+              >
+                Load More Positions
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
-
-        {filteredJobs.length === 0 && (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4 animate-pulse">
-              <Search className="w-8 h-8 text-secondary-400" />
-            </div>
-            <h3 className="text-lg font-medium text-secondary-900 mb-2">No positions found</h3>
-            <p className="text-secondary-600">
-              Try adjusting your search criteria or check back later for new opportunities.
-            </p>
-          </div>
-        )}
-
-        {/* Load More Button */}
-        {filteredJobs.length > visibleJobs && (
-          <div className="text-center mt-12">
-            <button
-              onClick={() => setVisibleJobs(prev => prev + 3)}
-              className="btn-primary px-8 py-3 inline-flex items-center group"
-            >
-              Load More Positions
-              <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        )}
-      </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Join Our Team?</h2>
-          <p className="text-xl mb-8 text-primary-100 max-w-2xl mx-auto">
-            Take the first step towards an exciting career at Veridia. 
-            Browse our open positions and find your perfect match.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register" className="btn-primary bg-white text-primary-600 hover:bg-gray-50 px-8 py-3">
-              Start Your Application
-            </Link>
-            <button className="btn-secondary border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3">
-              Learn About Veridia
-            </button>
+      <section className="careers-cta">
+        <div className="section-container">
+          <div className="cta-content">
+            <h2 className="cta-title">Ready to Join Our Team?</h2>
+            <p className="cta-subtitle">
+              Take the first step towards an exciting career at Veridia. 
+              Browse our open positions and find your perfect match.
+            </p>
+            <div className="cta-actions">
+              <Link to="/register" className="cta-primary-btn">
+                Start Your Application
+              </Link>
+              <button className="cta-secondary-btn">
+                Learn About Veridia
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

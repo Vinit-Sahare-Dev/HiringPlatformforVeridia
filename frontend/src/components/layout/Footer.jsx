@@ -1,120 +1,210 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Briefcase, Mail, Phone, MapPin, Linkedin, Twitter, Github, Heart } from 'lucide-react'
+import { Briefcase, Mail, Phone, MapPin, Linkedin, Twitter, Github, Heart, ChevronRight, Users, Shield, BookOpen, Award, Globe, Zap } from 'lucide-react'
 
 const Footer = () => {
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(false)
+
+  const handleSubscribe = (e) => {
+    e.preventDefault()
+    if (email) {
+      setIsSubscribed(true)
+      setTimeout(() => {
+        setIsSubscribed(false)
+        setEmail('')
+      }, 3000)
+    }
+  }
+
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-white" />
+    <footer className="footer">
+      {/* Main Footer Content */}
+      <div className="footer-container">
+        <div className="footer-content">
+          {/* Company Column */}
+          <div className="footer-column">
+            <div className="footer-brand">
+              <div className="brand-logo">
+                <Briefcase className="w-6 h-6" />
               </div>
-              <span className="text-xl font-bold">Veridia</span>
+              <span className="brand-name">Veridia</span>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Transform your career journey with our AI-powered hiring platform. 
-              Connecting talented professionals with their dream opportunities.
+            <p className="footer-description">
+              Revolutionizing the hiring landscape with intelligent matching technology. 
+              We connect exceptional talent with forward-thinking companies, creating 
+              meaningful career journeys that drive innovation and growth.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+            <div className="social-links">
+              <a href="https://linkedin.com/company/veridia" className="social-link" aria-label="LinkedIn">
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://twitter.com/veridia" className="social-link" aria-label="Twitter">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://github.com/veridia" className="social-link" aria-label="GitHub">
                 <Github className="w-5 h-5" />
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Quick Links</h3>
-            <ul className="space-y-2">
+          {/* Platform Column */}
+          <div className="footer-column">
+            <h3 className="footer-heading">Platform</h3>
+            <ul className="footer-links">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <Link to="/" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Careers
+                <Link to="/careers" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Browse Careers
                 </Link>
               </li>
               <li>
-                <Link to="/login" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Login
+                <Link to="/candidate/dashboard" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Candidate Portal
                 </Link>
               </li>
               <li>
-                <Link to="/register" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Register
+                <Link to="/admin/dashboard" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Employer Portal
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Resources</h3>
-            <ul className="space-y-2">
+          {/* Resources Column */}
+          <div className="footer-column">
+            <h3 className="footer-heading">Resources</h3>
+            <ul className="footer-links">
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <a href="#about" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Contact
+                <a href="#blog" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Career Blog
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <a href="#guides" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Interview Guides
+                </a>
+              </li>
+              <li>
+                <a href="#salary" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Salary Insights
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support Column */}
+          <div className="footer-column">
+            <h3 className="footer-heading">Support</h3>
+            <ul className="footer-links">
+              <li>
+                <a href="#contact" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Contact Us
+                </a>
+              </li>
+              <li>
+                <a href="#help" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
+                  Help Center
+                </a>
+              </li>
+              <li>
+                <a href="#privacy" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <a href="#terms" className="footer-link">
+                  <ChevronRight className="w-3 h-3" />
                   Terms of Service
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contact Us</h3>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-gray-400 text-sm">
-                <Mail className="w-4 h-4" />
-                <span>careers@veridia.com</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-400 text-sm">
-                <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-400 text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>San Francisco, CA</span>
-              </div>
-            </div>
+          {/* Newsletter Column */}
+          <div className="footer-column newsletter-column">
+            <h3 className="footer-heading">Stay Updated</h3>
+            <p className="newsletter-description">
+              Get the latest job opportunities and career insights delivered to your inbox.
+            </p>
+            <form onSubmit={handleSubscribe} className="newsletter-form">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="newsletter-input"
+                required
+              />
+              <button type="submit" className="newsletter-btn">
+                Subscribe
+              </button>
+            </form>
+            {isSubscribed && (
+              <p className="newsletter-success">
+                ✓ Successfully subscribed!
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © 2024 Veridia. All rights reserved.
-            </p>
-            <p className="text-gray-400 text-sm flex items-center">
-              Made with <Heart className="w-4 h-4 mx-1 text-red-500" /> for job seekers
-            </p>
+        {/* Trust Badges */}
+        <div className="trust-badges">
+          <div className="trust-badge">
+            <Users className="w-5 h-5" />
+            <span>50K+ Active Users</span>
+          </div>
+          <div className="trust-badge">
+            <Shield className="w-5 h-5" />
+            <span>Secure Platform</span>
+          </div>
+          <div className="trust-badge">
+            <Award className="w-5 h-5" />
+            <span>Award Winning</span>
+          </div>
+          <div className="trust-badge">
+            <Globe className="w-5 h-5" />
+            <span>Global Reach</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="footer-bottom">
+        <div className="footer-bottom-container">
+          <div className="footer-bottom-content">
+            <div className="copyright">
+              <p>&copy; 2024 Veridia Technologies Inc. All rights reserved.</p>
+              <p className="footer-tagline">
+                Built with <Heart className="w-4 h-4" /> for the future of work
+              </p>
+            </div>
+            
+            <div className="footer-legal-links">
+              <a href="#cookies" className="legal-link">Cookie Policy</a>
+              <a href="#accessibility" className="legal-link">Accessibility</a>
+              <a href="#compliance" className="legal-link">Compliance</a>
+            </div>
           </div>
         </div>
       </div>
