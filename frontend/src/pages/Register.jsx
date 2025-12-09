@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
 import { Eye, EyeOff, Mail, Lock, User, Briefcase, Shield, ArrowRight, Check } from 'lucide-react'
+import { authAPI } from '../services/api'
+import '../styles/Login.css'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,6 @@ const Register = () => {
   const [errors, setErrors] = useState({})
   const [agreeToTerms, setAgreeToTerms] = useState(false)
 
-  const { register } = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -73,15 +73,38 @@ const Register = () => {
     setLoading(true)
     setErrors({})
     
-    const result = await register(formData.name, formData.email, formData.password)
-    
-    if (result.success) {
-      // Redirect to login page with success message
-      navigate('/login', { 
-        state: { message: result.message || 'Registration successful! Please login with your credentials.' }
+    try {
+      // Call backend API
+      const response = await authAPI.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
       })
-    } else {
-      setErrors({ general: result.error })
+      
+      // Store token and user data if registration includes auto-login
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+        
+        // Redirect to dashboard after successful registration
+        setTimeout(() => {
+          navigate('/candidate/dashboard')
+        }, 2000)
+      } else {
+        // Redirect to login page with success message
+        navigate('/login', { 
+          state: { message: 'Registration successful! Please login with your credentials.' }
+        })
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      if (error.response?.data?.message) {
+        setErrors({ general: error.response.data.message })
+      } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        setErrors({ general: 'Cannot connect to server. Please make sure the backend is running on port 8080.' })
+      } else {
+        setErrors({ general: 'Registration failed. Please try again.' })
+      }
     }
     
     setLoading(false)
@@ -113,12 +136,6 @@ const Register = () => {
   return (
     <div className="auth-layout">
       <div className="auth-container">
-        {/* Background Elements */}
-        <div className="auth-background">
-          <div className="auth-pattern"></div>
-        </div>
-        
-        {/* Register Card */}
         <div className="auth-card">
           {/* Header */}
           <div className="auth-header">
@@ -372,60 +389,6 @@ const Register = () => {
                   Admin Login
                 </Link>
               </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Side Content */}
-        <div className="auth-side-content">
-          <div className="auth-side-content-inner">
-            <h2 className="auth-side-title">
-              Join Thousands of Professionals on Veridia
-            </h2>
-            <p className="auth-side-description">
-              Create your account today and access exclusive job opportunities, career resources, and professional networking.
-            </p>
-            
-            <div className="auth-features">
-              <div className="auth-feature">
-                <div className="auth-feature-icon">
-                  <Briefcase className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="auth-feature-title">500+ Companies</h3>
-                  <p className="auth-feature-description">Top companies hiring talent</p>
-                </div>
-              </div>
-              
-              <div className="auth-feature">
-                <div className="auth-feature-icon">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="auth-feature-title">Secure Platform</h3>
-                  <p className="auth-feature-description">Your data is protected with encryption</p>
-                </div>
-              </div>
-              
-              <div className="auth-feature">
-                <div className="auth-feature-icon">
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="auth-feature-title">Easy Apply</h3>
-                  <p className="auth-feature-description">One-click applications to dream jobs</p>
-                </div>
-              </div>
-              
-              <div className="auth-feature">
-                <div className="auth-feature-icon">
-                  <Check className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="auth-feature-title">Free Account</h3>
-                  <p className="auth-feature-description">No hidden fees or charges</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
