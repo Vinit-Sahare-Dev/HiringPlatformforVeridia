@@ -161,7 +161,7 @@ const Home = () => {
             
             <div className="hero-actions">
               {isAuthenticated && isCandidate ? (
-                <Link to="/candidate/apply" className="btn-primary">
+                <Link to="/careers" className="btn-primary">
                   Apply Now
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>

@@ -152,7 +152,9 @@ const EducationForm = ({ education, onChange, errors }) => {
                   type="month"
                   value={edu.startDate}
                   onChange={(e) => handleUpdateEducation(index, 'startDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:hover:bg-blue-50"
+                  min="2000-01"
+                  max="2030-12"
                   required
                 />
               </div>
@@ -165,7 +167,9 @@ const EducationForm = ({ education, onChange, errors }) => {
                   type="month"
                   value={edu.endDate}
                   onChange={(e) => handleUpdateEducation(index, 'endDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:hover:bg-blue-50"
+                  min="2000-01"
+                  max="2030-12"
                   required
                 />
               </div>

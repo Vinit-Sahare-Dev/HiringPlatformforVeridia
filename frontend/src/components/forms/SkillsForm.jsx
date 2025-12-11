@@ -3,12 +3,23 @@ import { Code, Plus, X } from 'lucide-react'
 import '../../styles/Applications.css'
 
 const SkillsForm = ({ skills, onChange, errors }) => {
-  const [newSkill, setNewSkill] = useState('')
+  const [showSkillsModal, setShowSkillsModal] = useState(false)
 
-  const handleAddSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      onChange([...skills, newSkill.trim()])
-      setNewSkill('')
+  const availableSkills = [
+    'JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular',
+    'Node.js', 'Express.js', 'Python', 'Java', 'C++',
+    'C#', 'PHP', 'Ruby', 'Go', 'Rust',
+    'HTML', 'CSS', 'SASS', 'Tailwind CSS', 'Bootstrap',
+    'MongoDB', 'MySQL', 'PostgreSQL', 'Redis', 'Docker',
+    'Kubernetes', 'AWS', 'Azure', 'Google Cloud', 'Git',
+    'Jest', 'Cypress', 'Webpack', 'GraphQL', 'REST API'
+  ]
+
+  const handleSkillToggle = (skill) => {
+    if (skills.includes(skill)) {
+      onChange(skills.filter(s => s !== skill))
+    } else {
+      onChange([...skills, skill])
     }
   }
 
@@ -16,41 +27,29 @@ const SkillsForm = ({ skills, onChange, errors }) => {
     onChange(skills.filter(skill => skill !== skillToRemove))
   }
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddSkill()
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <Code className="w-4 h-4 inline mr-2" />
+        <label className="block text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-3 flex items-center">
+          <Code className="w-5 h-5 mr-2 text-blue-600" />
           Technical Skills *
         </label>
-        <div className="flex gap-2 mb-3">
-          <input
-            type="text"
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Add a skill (e.g., JavaScript, React, Python)"
-          />
+        
+        {/* Add Skills Button */}
+        <div className="mb-4">
           <button
             type="button"
-            onClick={handleAddSkill}
+            onClick={() => setShowSkillsModal(true)}
             className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Add
+            Add Skills
           </button>
         </div>
         
+        {/* Selected Skills Display */}
         {skills.length === 0 ? (
-          <p className="text-gray-500 text-sm">No skills added yet. Add your technical skills above.</p>
+          <p className="text-gray-500 text-sm">No skills added yet. Click "Add Skills" to select your technical skills.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {skills.map((skill, index) => (
@@ -76,26 +75,69 @@ const SkillsForm = ({ skills, onChange, errors }) => {
         )}
       </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h4 className="font-medium text-gray-700 mb-2">Popular Skills</h4>
-        <div className="flex flex-wrap gap-2">
-          {['JavaScript', 'React', 'Python', 'Java', 'Node.js', 'TypeScript', 'HTML/CSS', 'SQL', 'MongoDB', 'Docker'].map((skill) => (
-            <button
-              key={skill}
-              type="button"
-              onClick={() => {
-                if (!skills.includes(skill)) {
-                  onChange([...skills, skill])
-                }
-              }}
-              className="px-3 py-1 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-100 transition-colors"
-              disabled={skills.includes(skill)}
-            >
-              {skill}
-            </button>
-          ))}
+      {/* Skills Modal */}
+      {showSkillsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Select Your Technical Skills
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowSkillsModal(false)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            
+            {/* Skills Grid */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {availableSkills.map((skill) => (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() => handleSkillToggle(skill)}
+                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                      skills.includes(skill)
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                    }`}
+                  >
+                    {skill}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="flex items-center justify-between p-6 border-t bg-gray-50">
+              <div className="text-sm text-gray-600">
+                {skills.length} skill{skills.length !== 1 ? 's' : ''} selected
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowSkillsModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSkillsModal(false)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

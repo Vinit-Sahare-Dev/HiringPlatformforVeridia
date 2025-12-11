@@ -31,7 +31,9 @@ const Applications = () => {
   const [searchName, setSearchName] = useState('')
   const [searchSkills, setSearchSkills] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
+  const [filterJob, setFilterJob] = useState('')
   const [expandedApp, setExpandedApp] = useState(null)
+  const [availableJobs, setAvailableJobs] = useState([])
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -56,7 +58,9 @@ const Applications = () => {
       
       const matchesStatus = !filterStatus || app.status === filterStatus
       
-      return matchesName && matchesSkills && matchesStatus
+      const matchesJob = !filterJob || app.jobId === parseInt(filterJob)
+      
+      return matchesName && matchesSkills && matchesStatus && matchesJob
     })
 
     // Calculate stats
@@ -69,7 +73,7 @@ const Applications = () => {
       rejected: filtered.filter(app => app.status === 'REJECTED').length
     }
     setStats(newStats)
-  }, [applications, searchName, searchSkills, filterStatus])
+  }, [applications, searchName, searchSkills, filterStatus, filterJob])
 
   const fetchApplications = async () => {
     try {
@@ -79,6 +83,14 @@ const Applications = () => {
       console.log('API Response:', response)
       console.log('Applications data:', response.data)
       setApplications(response.data)
+      
+      // Extract unique jobs from applications
+      const uniqueJobs = [...new Map(response.data
+        .filter(app => app.jobId && app.jobTitle)
+        .map(app => [app.jobId, { id: app.jobId, title: app.jobTitle, department: app.jobDepartment }])
+      ).values()]
+      console.log('Available jobs:', uniqueJobs)
+      setAvailableJobs(uniqueJobs)
     } catch (error) {
       console.error('Error fetching applications:', error)
       console.error('Error response:', error.response)
@@ -214,7 +226,7 @@ const Applications = () => {
       {/* Filters */}
       <div className="card">
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-secondary-400" />
@@ -241,18 +253,46 @@ const Applications = () => {
               />
             </div>
 
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="input-field"
-            >
-              <option value="">All Status</option>
-              <option value="PENDING">Pending</option>
-              <option value="UNDER_REVIEW">Under Review</option>
-              <option value="SHORTLISTED">Shortlisted</option>
-              <option value="ACCEPTED">Accepted</option>
-              <option value="REJECTED">Rejected</option>
-            </select>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Filter className="h-5 w-5 text-secondary-400" />
+              </div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="input-field pl-10 appearance-none cursor-pointer"
+              >
+                <option value="">All Status</option>
+                <option value="PENDING">Pending</option>
+                <option value="UNDER_REVIEW">Under Review</option>
+                <option value="SHORTLISTED">Shortlisted</option>
+                <option value="ACCEPTED">Accepted</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Briefcase className="h-5 w-5 text-secondary-400" />
+              </div>
+              <select
+                value={filterJob}
+                onChange={(e) => setFilterJob(e.target.value)}
+                className="input-field pl-10 appearance-none cursor-pointer"
+              >
+                <option value="">All Jobs</option>
+                {availableJobs.map(job => (
+                  <option key={job.id} value={job.id}>
+                    {job.title} {job.department && `(${job.department})`}
+                  </option>
+                ))}
+              </select>
+              {availableJobs.length === 0 && (
+                <div className="absolute -bottom-6 left-0 text-xs text-gray-500">
+                  No jobs found
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -271,7 +311,9 @@ const Applications = () => {
             
             const matchesStatus = !filterStatus || app.status === filterStatus
             
-            return matchesName && matchesSkills && matchesStatus
+            const matchesJob = !filterJob || app.jobId === parseInt(filterJob)
+            
+            return matchesName && matchesSkills && matchesStatus && matchesJob
           })
           .map((application) => (
           <div key={application.id} className="card hover:shadow-lg transition-shadow">
@@ -307,7 +349,7 @@ const Applications = () => {
               </div>
 
               {/* Quick Info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <div className="flex items-center space-x-2 text-sm text-secondary-600">
                   <Phone className="w-4 h-4 text-primary-500" />
                   <span>{application.phone}</span>
@@ -320,7 +362,42 @@ const Applications = () => {
                   <Calendar className="w-4 h-4 text-primary-500" />
                   <span>Applied {formatDate(application.createdAt)}</span>
                 </div>
+                <div className="flex items-center space-x-2 text-sm text-secondary-600">
+                  <Briefcase className="w-4 h-4 text-primary-500" />
+                  <span>{application.jobTitle || 'General Application'}</span>
+                </div>
               </div>
+
+              {/* Job Details */}
+              {application.jobId && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Briefcase className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <span className="font-medium text-blue-900">Position: </span>
+                      <span className="text-blue-800">{application.jobTitle || 'Unknown Position'}</span>
+                      {application.jobDepartment && (
+                        <>
+                          <span className="text-blue-600 mx-2">•</span>
+                          <span className="text-blue-800">{application.jobDepartment}</span>
+                        </>
+                      )}
+                      {application.jobLocation && (
+                        <>
+                          <span className="text-blue-600 mx-2">•</span>
+                          <span className="text-blue-800">{application.jobLocation}</span>
+                        </>
+                      )}
+                      {application.jobType && (
+                        <>
+                          <span className="text-blue-600 mx-2">•</span>
+                          <span className="text-blue-800">{application.jobType}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Expanded Details */}
               {expandedApp === application.id && (
@@ -473,7 +550,9 @@ const Applications = () => {
           
           const matchesStatus = !filterStatus || app.status === filterStatus
           
-          return matchesName && matchesSkills && matchesStatus
+          const matchesJob = !filterJob || app.jobId === parseInt(filterJob)
+          
+          return matchesName && matchesSkills && matchesStatus && matchesJob
         }).length === 0 && (
           <div className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">

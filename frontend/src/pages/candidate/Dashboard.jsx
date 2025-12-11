@@ -21,53 +21,54 @@ import {
   TrendingUp,
   Star,
   Users,
-  Bell
+  Bell,
+  ArrowRight
 } from 'lucide-react'
 import '../../styles/Applications.css'
 
 const Dashboard = () => {
-  const [application, setApplication] = useState(null)
+  const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [selectedApplication, setSelectedApplication] = useState(null)
 
   useEffect(() => {
-    fetchApplication()
+    fetchApplications()
   }, [])
 
-  // Trigger confetti when application is accepted
+  // Trigger confetti when any application is accepted
   useEffect(() => {
-    if (application && application.status === 'ACCEPTED') {
+    const hasAccepted = applications.some(app => app.status === 'ACCEPTED')
+    if (hasAccepted) {
       setShowConfetti(true)
-      // Hide confetti after 3 seconds
       const timer = setTimeout(() => {
         setShowConfetti(false)
       }, 3000)
       return () => clearTimeout(timer)
     }
-  }, [application])
+  }, [applications])
 
-  const fetchApplication = async () => {
+  const fetchApplications = async () => {
     try {
-      const response = await applicationAPI.getMyApplication()
-      setApplication(response.data)
+      const response = await applicationAPI.getMyApplications()
+      setApplications(response.data)
     } catch (error) {
-      // Check if there's a locally stored application as backup
+      console.error('Error fetching applications:', error)
+      // Check for local storage backup
       const localApplication = localStorage.getItem('applicationSubmitted')
-      const localData = localStorage.getItem('applicationData')
-      
-      if (localApplication === 'true' && localData) {
-        console.log('Backend not available, showing locally stored application')
-        const parsedData = JSON.parse(localData)
-        setApplication({
-          ...parsedData,
-          status: 'PENDING',
-          candidateEmail: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).email : 'candidate@example.com',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          resumeUrl: 'Resume uploaded locally'
-        })
-      } else {
-        console.log('No application found')
+      if (localApplication === 'true') {
+        const localData = localStorage.getItem('applicationData')
+        if (localData) {
+          const parsedData = JSON.parse(localData)
+          setApplications([{
+            ...parsedData,
+            status: 'PENDING',
+            candidateEmail: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).email : 'candidate@example.com',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            resumeUrl: 'Resume uploaded locally'
+          }])
+        }
       }
     } finally {
       setLoading(false)
@@ -125,41 +126,47 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-blue-50 mt-0 pt-0">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       <Confetti trigger={showConfetti} duration={3000} />
-      <div className="w-full px-4 py-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="w-full bg-white rounded-lg shadow-md p-6">
-            <div className="w-full bg-blue-600 text-white rounded-lg p-6">
-              <div className="flex flex-col lg:flex-row items-center justify-between">
-                <div className="text-center lg:text-left mb-4 lg:mb-0">
-                  <h1 className="text-3xl font-bold text-white mb-2">
-                    Welcome to Your Dashboard
-                  </h1>
-                  <p className="text-blue-100">
-                    Manage your job application and track your career journey
-                  </p>
-                </div>
-                <div className="flex space-x-4">
-                  <div className="text-center bg-blue-700 rounded-lg p-3">
-                    <div className="text-2xl font-bold text-white">{application ? '1' : '0'}</div>
-                    <div className="text-sm text-blue-100">Applications</div>
-                  </div>
-                  <div className="text-center bg-blue-700 rounded-lg p-3">
-                    <div className="text-2xl font-bold text-white">{application ? application.status : 'Not Started'}</div>
-                    <div className="text-sm text-blue-100">Current Status</div>
-                  </div>
-                </div>
+      
+      {/* Full Width Header */}
+      <div className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-2xl">
+        <div className="w-full px-6 py-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between w-full">
+            <div className="text-center lg:text-left mb-6 lg:mb-0">
+              <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
+                Welcome to Your Dashboard
+              </h1>
+              <p className="text-blue-100 text-xl">
+                Manage your job applications and track your career journey
+              </p>
+            </div>
+            <div className="flex space-x-6">
+              <div className="text-center bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl">
+                <div className="text-4xl font-bold text-white mb-2">{applications.length}</div>
+                <div className="text-base text-blue-100 font-semibold">Applications</div>
+              </div>
+              <div className="text-center bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl">
+                <div className="text-4xl font-bold text-white mb-2">{applications.filter(app => app.status === 'ACCEPTED').length}</div>
+                <div className="text-base text-blue-100 font-semibold">Accepted</div>
+              </div>
+              <div className="text-center bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl">
+                <div className="text-4xl font-bold text-white mb-2">{applications.filter(app => app.status === 'SHORTLISTED').length}</div>
+                <div className="text-base text-blue-100 font-semibold">Shortlisted</div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-      {!application ? (
+      {/* Main Content - Full Width */}
+      <div className="w-full px-6 py-8">
+
+      {applications.length === 0 ? (
         /* No Application Yet - Enhanced Design */
         <div className="space-y-8">
           {/* Hero Section */}
+          <div className="w-full bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-8">
           <div className="w-full bg-white rounded-lg shadow-md p-8">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-24 h-24 bg-blue-100 rounded-full mb-6">
@@ -272,215 +279,290 @@ const Dashboard = () => {
           </div>
         </div>
       ) : (
-        /* Application Exists */
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Application Card */}
-          <div className="lg:col-span-2">
-            <div className="card">
-              <div className="card-header">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-secondary-900">Application Details</h3>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(application.status)} ${application.status === 'ACCEPTED' ? 'celebration-text success-pulse' : ''}`}>
-                    {getStatusIcon(application.status)}
-                    <span className="ml-1">{application.status}</span>
-                  </span>
-                </div>
+        /* Multiple Applications - Full Width Cards View */
+        <div className="space-y-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+            <h2 className="text-4xl font-bold text-white mb-4 lg:mb-0">Your Applications</h2>
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white Chelsea/30">
+                <span classNameedImage text-blue-200">Total: </span>
+                <span className="font-bold text-white text-lg">{applications.length} application{applications.length !== 1 ? 's' : ''}</span>
               </div>
-              <div className="card-body">
-                <div className="space-y-6">
-                  {/* Personal Information */}
-                  <div>
-                    <h4 className="font-medium text-secondary-900 mb-3 flex items-center">
-                      <User className="w-4 h-4 mr-2" />
-                      Personal Information
-                    </h4>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-secondary-600 mb-1">Phone</label>
-                        <input
-                          type="tel"
-                          value={application.phone}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed"
-                          readOnly
-                        />
+              <Link
+                to="/                className emotional: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl hover:ching-blue-700 transition-all transform hover:scale-105 shadow-lg inline-flex items-center"
+              >
+                <Briefcase className="w-5 h-5 mr-2" />
+                Browse More Jobs
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            {applications.map((app) => (
+              <div key={app.id} className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 cursor-pointer border border-white/20 overflow-hidden group hover:bg-white/15 hover:scale-105" 
+                   onClick={() => setSelectedApplication(selectedApplication?.id === app.id ? null : app)}>
+                {/* Card Header */}
+                <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 p-4 border-b border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl ${getStatusColor(app.status).replace('text-', 'bg-').replace('-800', '-900')} shadow-lg border border-white/20`}>
+                        {getStatusIcon(app.status)}
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-secondary-600 mb-1">Email</label>
-                        <input
-                          type="email"
-                          value={application.candidateEmail}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed"
-                          readOnly
-                        />
+                      <div className="flex-1">
+                        <h3 className="font-bold text-white text-lg leading-tight">
+                          {app.jobTitle || 'General Application'}
+                        </h3>
+                        <p className="text-sm text-blue-200 font-medium">
+                          {app.firstName} {app.lastName}
+                        </p>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Status Badge */}
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border ${getStatusColor(app.status)} shadow-lg bg-white/10`}>
+                      {getStatusIcon(app.status)}
+                      <span className="ml-1.5">{app.status}</span>
+                    </span>
+                    {app.jobDepartment && (
+                      <span className="text-xs text-blue-200 bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                        {app.jobDepartment}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Card Body */}
+                <div className="p-4 space-y-3">
+                  {/* Job Details */}
+                  {app.jobLocation && (
+                    <div className="flex items-center text-sm text-blue-200">
+                      <MapPin className="w-4 h-4 mr-2 text-blue-300" />
+                      <span>{app.jobLocation}</span>
+                    </div>
+                  )}
+                  
+                  {app.jobType && (
+                    <div className="flex items-center text-sm text-blue-200">
+                      <Clock className="w-4 h-4 mr-2 text-blue-300" />
+                      <span>{app.jobType}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center text-sm text-blue-200">
+                    <Calendar className="w-4 h-4 mr-2 text-blue-300" />
+                    <span>Applied: {formatDate(app.submittedAt || app.createdAt)}</span>
+                  </div>
 
-                  {/* Skills */}
-                  {application.skills && (
-                    <div>
-                      <h4 className="font-medium text-secondary-900 mb-3 flex items-center">
-                        <Briefcase className="w-4 h-4 mr-2" />
-                        Skills
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {application.skills.split(',').map((skill, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
-                          >
-                            {skill.trim()}
+                  {/* Skills Preview */}
+                  {app.skills && (
+                    <div className="pt-3 border-t border-white/10">
+                      <div className="flex items-start">
+                        <Briefcase className="w-4 h-4 mr-2 mt-0.5 text-blue-300" />
+                        <div className="flex flex-wrap gap-1">
+                          {app.skills.split(',').slice(0, 2).map((skill, index) => (
+                            <span key={index} className="px-2 py-1 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-100 rounded text-xs font-medium border border-blue-400/30">
+                              {skill.trim()}
+                            </span>
+                          ))}
+                          {app.skills.split(',').length > 2 && (
+                            <span className="px-2 py-1 bg-white/10 text-blue-200 rounded text-xs font-medium border border-white/20">
+                              +{app.skills.split(',').length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Resume Indicator */}
+                  {app.resumeUrl && (
+                    <div className="pt-3 border-t border-white/10">
+                      <div className="flex items-center text-sm text-green-400 bg-green-500/10 px-3 py-2 rounded-lg border border-green-400/30">
+                        <FileText className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Resume attached</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Click to view hint */}
+                  <div className="pt-3 border-t border-white/10">
+                    <div className="flex items-center justify-center text-xs text-blue-300 group-hover:text-white transition-colors">
+                      <span>Click to view details</span>
+                      <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Detailed View Modal - Full Screen */}
+          {selectedApplication && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-6 z-50">
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl border border-white/20">
+                {/* Modal Header */}
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 text-white p-8 border-b border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-6">
+                      <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/40 shadow-2xl`}>
+                        {getStatusIcon(selectedApplication.status)}
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-bold text-white mb-2">
+                          {selectedApplication.jobTitle || 'General Application'}
+                        </h3>
+                        <p className="text-blue-100 text-lg">
+                          {selectedApplication.firstName} {selectedApplication.lastName}
+                        </p>
+                        {selectedApplication.jobDepartment && (
+                          <p className="text-blue-200 text-sm mt-1">{selectedApplication.jobDepartment}</p>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedApplication(null)}
+                      className="text-white/80 hover:text-white hover:bg-white/20 rounded-xl p-3 transition-all transform hover:scale-110"
+                    >
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-8 max-h-[70vh] overflow-y-auto">
+                  <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Left Column */}
+                    <div className="space-y-6">
+                      {/* Status */}
+                      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                        <h4 className="font-bold text-white text-xl mb-4">Application Status</h4>
+                        <div className="flex items-center justify-between">
+                          <span className={`inline-flex items-center px-6 py-3 rounded-full text-lg font-bold border ${getStatusColor(selectedApplication.status)} bg-white/10 shadow-lg`}>
+                            {getStatusIcon(selectedApplication.status)}
+                            <span className="ml-3">{selectedApplication.status}</span>
                           </span>
-                        ))}
+                          <span className="text-blue-200 text-lg">
+                            Updated: {formatDate(selectedApplication.updatedAt)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Personal Info */}
+                      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                        <h4 className="font-bold text-white text-xl mb-4">Personal Information</h4>
+                        <div className="space-y-4 text-lg">
+                          <div className="flex justify-between">
+                            <span className="text-blue-200">Name:</span>
+                            <span className="font-medium text-white">{selectedApplication.firstName} {selectedApplication.lastName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-200">Email:</span>
+                            <span className="font-medium text-white">{selectedApplication.email}</span>
+                          </div>
+                          {selectedApplication.phone && (
+                            <div className="flex justify-between">
+                              <span className="text-blue-200">Phone:</span>
+                              <span className="font-medium text-white">{selectedApplication.phone}</span>
+                            </div>
+                          )}
+                          {selectedApplication.location && (
+                            <div className="flex justify-between">
+                              <span className="text-blue-200">Location:</span>
+                              <span className="font-medium text-white">{selectedApplication.location}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Job Details */}
+                      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                        <h4 className="font-bold text-white text-xl mb-4">Job Details</h4>
+                        <div className="space-y-4 text-lg">
+                          {selectedApplication.jobDepartment && (
+                            <div className="flex justify-between">
+                              <span className="text-blue-200">Department:</span>
+                              <span className="font-medium text-white">{selectedApplication.jobDepartment}</span>
+                            </div>
+                          )}
+                          {selectedApplication.jobLocation && (
+                            <div className="flex justify-between">
+                              <span className="text-blue-200">Location:</span>
+                              <span className="font-medium text-white">{selectedApplication.jobLocation}</span>
+                            </div>
+                          )}
+                          {selectedApplication.jobType && (
+                            <div className="flex justify-between">
+                              <span className="text-blue-200">Type:</span>
+                              <span className="font-medium text-white">{selectedApplication.jobType}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Education */}
-                  {application.education && (
-                    <div>
-                      <h4 className="font-medium text-secondary-900 mb-3">Education</h4>
-                      <textarea
-                        value={application.education}
-                        disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed resize-none"
-                        rows={4}
-                        readOnly
-                      />
-                    </div>
-                  )}
+                    {/* Right Column */}
+                    <div className="space-y-6">
+                      {/* Skills */}
+                      {selectedApplication.skills && (
+                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                          <h4 className="font-bold text-white text-xl mb-4">Skills</h4>
+                          <div className="flex flex-wrap gap-3">
+                            {selectedApplication.skills.split(',').map((skill, index) => (
+                              <span key={index} className="px-4 py-2 bg-gradient-to-r from-blue-500/30 to-indigo-500/30 text-white rounded-full text-sm font-bold border border-blue-400/50 shadow-lg">
+                                {skill.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-                  {/* Experience */}
-                  {application.experience && (
-                    <div>
-                      <h4 className="font-medium text-secondary-900 mb-3">Experience</h4>
-                      <textarea
-                        value={application.experience}
-                        disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed resize-none"
-                        rows={4}
-                        readOnly
-                      />
-                    </div>
-                  )}
+                      {/* Experience */}
+                      {selectedApplication.experience && (
+                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                          <h4 className="font-bold text-white text-xl mb-4">Experience</h4>
+                          <p className="text-white whitespace-pre-wrap leading-relaxed text-lg">{selectedApplication.experience}</p>
+                        </div>
+                      )}
 
-                  {/* Portfolio */}
-                  {application.portfolioLink && (
-                    <div>
-                      <h4 className="font-medium text-secondary-900 mb-3">Portfolio</h4>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="url"
-                          value={application.portfolioLink}
-                          disabled
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed"
-                          readOnly
-                        />
-                        <a
-                          href={application.portfolioLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-2 text-primary-600 hover:text-primary-700 border border-primary-300 rounded-md hover:bg-primary-50"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-1" />
-                          Visit
-                        </a>
+                      {/* Education */}
+                      {selectedApplication.education && (
+                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                          <h4 className="font-bold text-white text-xl mb-4">Education</h4>
+                          <p className="text-white whitespace-pre-wrap leading-relaxed text-lg">{selectedApplication.education}</p>
+                        </div>
+                      )}
+
+                      {/* Links */}
+                      <div className="space-y-4">
+                        {selectedApplication.portfolioLink && (
+                          <a
+                            href={selectedApplication.portfolioLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-2xl text-lg font-bold"
+                          >
+                            <ExternalLink className="w-5 h-5 mr-3" />
+                            View Portfolio
+                          </a>
+                        )}
+                        
+                        {selectedApplication.resumeUrl && (
+                          <div className="flex items-center justify-center w-full bg-green-500/20 text-green-400 px-6 py-4 rounded-2xl border border-green-400/30 backdrop-blur-md">
+                            <FileText className="w-5 h-5 mr-3" />
+                            <span className="font-bold text-lg">Resume attached</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
-
-                  {/* Resume */}
-                  {application.resumeUrl && (
-                    <div>
-                      <h4 className="font-medium text-secondary-900 mb-3">Resume</h4>
-                      <div className="flex items-center space-x-2 text-sm text-secondary-600">
-                        <FileText className="w-4 h-4" />
-                        <span>Resume uploaded successfully</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Status Card */}
-            <div className="card">
-              <div className="card-header">
-                <h3 className="text-lg font-semibold text-secondary-900">Application Status</h3>
-              </div>
-              <div className="card-body">
-                <div className="text-center">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${getStatusColor(application.status).replace('text-', 'bg-').replace('-800', '-100')}`}>
-                    {getStatusIcon(application.status)}
                   </div>
-                  <p className="text-2xl font-bold text-secondary-900 mb-2">{application.status}</p>
-                  <p className="text-sm text-secondary-600">
-                    Last updated: {formatDate(application.updatedAt)}
-                  </p>
                 </div>
               </div>
             </div>
-
-            {/* Timeline */}
-            <div className="card">
-              <div className="card-header">
-                <h3 className="text-lg font-semibold text-secondary-900">Timeline</h3>
-              </div>
-              <div className="card-body">
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="font-medium text-secondary-900">Application Submitted</p>
-                      <p className="text-sm text-secondary-600">{formatDate(application.createdAt)}</p>
-                    </div>
-                  </div>
-                  {application.updatedAt !== application.createdAt && (
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <div>
-                        <p className="font-medium text-secondary-900">Status Updated</p>
-                        <p className="text-sm text-secondary-600">{formatDate(application.updatedAt)}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="card">
-              <div className="card-header">
-                <h3 className="text-lg font-semibold text-secondary-900">Quick Actions</h3>
-              </div>
-              <div className="card-body space-y-3">
-                <Link
-                  to="/candidate/profile"
-                  className="btn-secondary w-full text-center"
-                >
-                  Update Profile
-                </Link>
-                <Link
-                  to="/candidate/notifications"
-                  className="btn-secondary w-full text-center flex items-center justify-center"
-                >
-                  <Bell className="w-4 h-4 mr-2" />
-                  View Notifications
-                </Link>
-                <Link
-                  to="/candidate/apply"
-                  className="btn-secondary w-full text-center"
-                >
-                  View Application Form
-                </Link>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       )}
       </div>
