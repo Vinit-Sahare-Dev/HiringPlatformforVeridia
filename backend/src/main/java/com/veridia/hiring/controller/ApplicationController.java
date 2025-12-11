@@ -84,7 +84,7 @@ public class ApplicationController {
                 applicationRequest.getExpectedSalary(),
                 applicationRequest.getNoticePeriod(),
                 applicationRequest.getWorkMode(),
-                applicationRequest.getJobId(),
+                applicationRequest.getJobId() != null ? (Long) applicationRequest.getJobId() : null,
                 resume
             );
             
@@ -94,13 +94,24 @@ public class ApplicationController {
             try {
                 String jobTitle = "Position";
                 if (applicationRequest.getJobId() != null) {
-                    Job job = jobService.getJobById(applicationRequest.getJobId());
+                    Job job = jobService.getJobById((Long) applicationRequest.getJobId());
                     if (job != null) {
                         jobTitle = job.getTitle();
                     }
                 }
-                emailService.sendApplicationSubmissionEmail(candidate.getEmail(), candidate.getName(), jobTitle);
-                System.out.println("Email notification sent");
+                
+                // Use personalized email method
+                String[] names = applicationRequest.getFirstName().split(" ", 2);
+                String firstName = names.length > 0 ? names[0] : "Candidate";
+                String lastName = names.length > 1 ? names[1] : "";
+                
+                emailService.sendApplicationSubmissionEmail(
+                    candidate.getEmail(), 
+                    firstName, 
+                    lastName, 
+                    jobTitle
+                );
+                System.out.println("Application submission email sent to: " + candidate.getEmail());
             } catch (Exception emailError) {
                 System.err.println("Failed to send email: " + emailError.getMessage());
                 // Don't fail the request if email fails
@@ -203,6 +214,30 @@ public class ApplicationController {
                 appMap.put("submittedAt", app.getCreatedAt());
                 appMap.put("updatedAt", app.getUpdatedAt());
                 appMap.put("jobId", app.getJobId());
+                
+                // Add job details if jobId exists
+                if (app.getJobId() != null) {
+                    try {
+                        Job job = jobService.getJobById(app.getJobId());
+                        if (job != null) {
+                            appMap.put("jobTitle", job.getTitle());
+                            appMap.put("jobDepartment", job.getDepartment());
+                            appMap.put("jobLocation", job.getLocation());
+                            appMap.put("jobType", job.getType());
+                        } else {
+                            appMap.put("jobTitle", "Position Not Found");
+                            appMap.put("jobDepartment", "Unknown");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error fetching job details for jobId " + app.getJobId() + ": " + e.getMessage());
+                        appMap.put("jobTitle", "Position Not Found");
+                        appMap.put("jobDepartment", "Unknown");
+                    }
+                } else {
+                    appMap.put("jobTitle", "General Application");
+                    appMap.put("jobDepartment", "General");
+                }
+                
                 return appMap;
             }).toList();
             
@@ -268,6 +303,31 @@ public class ApplicationController {
                 appMap.put("status", app.getStatus().name());
                 appMap.put("createdAt", app.getCreatedAt());
                 appMap.put("updatedAt", app.getUpdatedAt());
+                appMap.put("jobId", app.getJobId());
+                
+                // Add job details if jobId exists
+                if (app.getJobId() != null) {
+                    try {
+                        Job job = jobService.getJobById(app.getJobId());
+                        if (job != null) {
+                            appMap.put("jobTitle", job.getTitle());
+                            appMap.put("jobDepartment", job.getDepartment());
+                            appMap.put("jobLocation", job.getLocation());
+                            appMap.put("jobType", job.getType());
+                        } else {
+                            appMap.put("jobTitle", "Unknown Position");
+                            appMap.put("jobDepartment", "Unknown");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error fetching job details for jobId " + app.getJobId() + ": " + e.getMessage());
+                        appMap.put("jobTitle", "Position Not Found");
+                        appMap.put("jobDepartment", "Unknown");
+                    }
+                } else {
+                    appMap.put("jobTitle", "General Application");
+                    appMap.put("jobDepartment", "General");
+                }
+                
                 return appMap;
             }).toList());
         } catch (Exception e) {
@@ -293,10 +353,24 @@ public class ApplicationController {
             
             // Send email notification
             try {
+                String jobTitle = "Position";
+                if (application.getJobId() != null) {
+                    Job job = jobService.getJobById(application.getJobId());
+                    if (job != null) {
+                        jobTitle = job.getTitle();
+                    }
+                }
+                
+                String[] names = application.getFirstName().split(" ", 2);
+                String firstName = names.length > 0 ? names[0] : "Candidate";
+                String lastName = names.length > 1 ? names[1] : "";
+                
                 emailService.sendStatusUpdateEmail(
                     application.getCandidate().getEmail(),
-                    application.getCandidate().getName(),
-                    newStatus.name()
+                    firstName,
+                    lastName,
+                    newStatus.name(),
+                    jobTitle
                 );
             } catch (Exception emailError) {
                 System.err.println("Failed to send status update email: " + emailError.getMessage());

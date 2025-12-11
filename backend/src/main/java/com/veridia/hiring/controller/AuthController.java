@@ -7,6 +7,7 @@ import com.veridia.hiring.dto.RegisterRequest;
 import com.veridia.hiring.model.Role;
 import com.veridia.hiring.model.User;
 import com.veridia.hiring.service.UserService;
+import com.veridia.hiring.service.EmailService;
 import com.veridia.hiring.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private EmailService emailService;
+
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Map<String, Object>>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
@@ -46,12 +50,25 @@ public class AuthController {
                 Role.CANDIDATE
             );
             
+            // Send welcome email
+            try {
+                String[] names = registerRequest.getName().split(" ", 2);
+                String firstName = names.length > 0 ? names[0] : "User";
+                String lastName = names.length > 1 ? names[1] : "";
+                
+                emailService.sendWelcomeEmail(user.getEmail(), firstName, lastName);
+                System.out.println("Welcome email sent to: " + user.getEmail());
+            } catch (Exception emailError) {
+                System.err.println("Failed to send welcome email: " + emailError.getMessage());
+                // Don't fail registration if email fails
+            }
+            
             Map<String, Object> userData = new HashMap<>();
             userData.put("email", user.getEmail());
             userData.put("name", user.getName());
             userData.put("role", user.getRole().name());
             
-            ApiResponse<Map<String, Object>> response = ApiResponse.success("User registered successfully. Please login with your credentials.", userData);
+            ApiResponse<Map<String, Object>> response = ApiResponse.success("User registered successfully. Welcome email sent!", userData);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             ApiResponse<Map<String, Object>> response = ApiResponse.error(e.getMessage());
@@ -89,6 +106,34 @@ public class AuthController {
         } catch (Exception e) {
             ApiResponse<AuthResponse> response = ApiResponse.error("Login failed. Please try again.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/test-email")
+    public ResponseEntity<?> testEmail() {
+        try {
+            System.out.println("=== Testing Email Service ===");
+            System.out.println("Email configuration:");
+            System.out.println("- Host: smtp.gmail.com");
+            System.out.println("- Port: 587");
+            System.out.println("- Username: empsyncofficial@gmail.com");
+            System.out.println("- Password provided: " + (System.getProperty("spring.mail.password") != null ? "Yes" : "No"));
+            
+            emailService.sendApplicationSubmissionEmail("test@example.com", "Test User", "Test Position");
+            
+            System.out.println("=== Test Email Sent Successfully ===");
+            return ResponseEntity.ok(Map.of("message", "Test email sent successfully"));
+        } catch (Exception e) {
+            System.err.println("=== Email Test Failed ===");
+            System.err.println("Error Type: " + e.getClass().getName());
+            System.err.println("Error Message: " + e.getMessage());
+            e.printStackTrace();
+            
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Failed to send test email",
+                "details", e.getMessage(),
+                "type", e.getClass().getSimpleName()
+            ));
         }
     }
 }
