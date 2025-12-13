@@ -58,7 +58,7 @@ const jobs = [
     location: 'Pune',
     type: 'Full-time',
     experience: '3-5 years',
-    salary: '6 LPA - 10 LPA',
+    salary: '7 LPA - 10 LPA',
     category: 'engineering',
     level: 'Mid-level'
   },
@@ -66,10 +66,10 @@ const jobs = [
     id: 4,
     title: 'UX Designer',
     department: 'Design',
-    location: 'Remote',
+    location: 'Bangalore',
     type: 'Full-time',
     experience: '2-4 years',
-    salary: '5 LPA - 8 LPA',
+    salary: '5 LPA - 7 LPA',
     category: 'design',
     level: 'Mid-level'
   },
@@ -77,11 +77,55 @@ const jobs = [
     id: 5,
     title: 'Data Scientist',
     department: 'Data',
-    location: 'Bangalore',
+    location: 'Remote / Pune',
+    type: 'Full-time',
+    experience: '4-6 years',
+    salary: '6 LPA - 8 LPA',
+    category: 'data',
+    level: 'Senior'
+  },
+  {
+    id: 6,
+    title: 'Marketing Manager',
+    department: 'Marketing',
+    location: 'Hyderabad',
     type: 'Full-time',
     experience: '3-5 years',
-    salary: '7 LPA - 11 LPA',
-    category: 'data',
+    salary: '4 LPA - 6 LPA',
+    category: 'marketing',
+    level: 'Mid-level'
+  },
+  {
+    id: 7,
+    title: 'DevOps Engineer',
+    department: 'Engineering',
+    location: 'Bangalore',
+    type: 'Full-time',
+    experience: '4-6 years',
+    salary: '6 LPA - 8 LPA',
+    category: 'engineering',
+    level: 'Senior'
+  },
+  {
+    id: 8,
+    title: 'Content Strategist',
+    department: 'Marketing',
+    location: 'Remote',
+    type: 'Full-time',
+    experience: '2-4 years',
+    salary: '3 LPA - 4 LPA',
+    category: 'marketing',
+    level: 'Mid-level'
+  },
+  {
+    id: 9,
+    title: 'Full Stack Developer',
+    department: 'Engineering',
+    location: 'Bangalore / Hybrid',
+    type: 'Full-time',
+    experience: '3-5 years',
+    salary: '6 LPA - 9 LPA',
+    category: 'engineering',
     level: 'Mid-level'
   }
 ]
@@ -95,6 +139,26 @@ const Dashboard = () => {
   // Function to get job details by ID
   const getJobById = (jobId) => {
     return jobs.find(job => job.id === parseInt(jobId))
+  }
+
+  // Function to clean up job title display
+  const getJobTitle = (application) => {
+    // First try to get job title from jobs array using jobId
+    if (application.jobId) {
+      const job = getJobById(application.jobId)
+      if (job) {
+        return job.title
+      }
+    }
+    
+    // Fallback to jobTitle from application, but clean it up
+    if (application.jobTitle) {
+      const title = application.jobTitle
+      // Remove any "#" prefixes and clean up the title
+      return title.replace(/^#+\s*/, '').trim()
+    }
+    
+    return 'General Application'
   }
 
   useEffect(() => {
@@ -429,7 +493,7 @@ const Dashboard = () => {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-bold text-white text-lg leading-tight">
-                          {app.jobId ? getJobById(app.jobId)?.title || 'Position Not Found' : app.jobTitle || 'General Application'}
+                          {getJobTitle(app)}
                         </h3>
                         <div className="flex items-center space-x-3">
                           <span className="text-sm text-blue-100 font-medium">
@@ -470,7 +534,7 @@ const Dashboard = () => {
                       <div className="min-w-0">
                         <p className="text-xs text-gray-600 font-medium">Position Applied</p>
                         <p className="text-sm font-bold text-gray-800 truncate">
-                          {app.jobId ? getJobById(app.jobId)?.title || 'Position Not Found' : app.jobTitle || 'General Application'}
+                          {getJobTitle(app)}
                         </p>
                       </div>
                     </div>
@@ -564,7 +628,7 @@ const Dashboard = () => {
                       </div>
                       <div>
                         <h3 className="text-3xl font-bold text-white mb-2">
-                          {selectedApplication.jobTitle || 'General Application'}
+                          {getJobTitle(selectedApplication)}
                         </h3>
                         <p className="text-blue-100 text-lg">
                           {selectedApplication.firstName} {selectedApplication.lastName}

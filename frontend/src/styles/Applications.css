@@ -1,5 +1,32 @@
 /* Applications Page Specific Styles */
 
+/* Prevent horizontal scrollbar */
+body, html {
+  overflow-x: hidden;
+}
+
+.careers-container, .dashboard-container {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Specific fixes for dashboard containers */
+.max-w-7xl {
+  overflow-x: hidden;
+}
+
+/* Fix for grid layouts that might overflow */
+.grid {
+  overflow-x: hidden;
+}
+
+/* Fix for cards and containers */
+.application-card, .profile-card, .dashboard-card {
+  overflow-x: hidden;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

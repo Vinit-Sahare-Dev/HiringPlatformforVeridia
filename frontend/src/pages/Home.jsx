@@ -99,22 +99,22 @@ const Home = () => {
 
   const testimonials = [
     {
-      name: "Sarah Chen",
+      name: "Priya Sharma",
       role: "Senior Engineer",
       content: "Veridia isn't just a job—it's a place where I'm challenged to grow every single day. The team is incredible, and the work we're doing genuinely matters.",
-      avatar: "SC"
+      avatar: "PS"
     },
     {
-      name: "Marcus Rodriguez",
+      name: "Rahul Verma",
       role: "Product Designer", 
       content: "The creative freedom and trust I get here is unmatched. We're building products that users love, and I get to do it alongside amazing people.",
-      avatar: "MR"
+      avatar: "RV"
     },
     {
-      name: "Emily Watson",
+      name: "Anjali Patel",
       role: "Engineering Manager",
       content: "I've never worked at a place that invests so much in its people's growth. The mentorship and opportunities here are exceptional.",
-      avatar: "EW"
+      avatar: "AP"
     }
   ]
 

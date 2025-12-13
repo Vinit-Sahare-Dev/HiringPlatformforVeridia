@@ -117,8 +117,8 @@ function App() {
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-            <Footer />
           </AuthProvider>
+          <Footer />
         </div>
       </Router>
     </ErrorBoundary>

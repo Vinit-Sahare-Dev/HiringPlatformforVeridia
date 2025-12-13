@@ -72,11 +72,18 @@ const AdminDashboard = () => {
 
   const fetchJobs = async () => {
     try {
+      console.log('Fetching jobs from /api/jobs/admin/all...')
       const response = await fetch('/api/jobs/admin/all')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
       const data = await response.json()
+      console.log('Jobs fetched:', data)
       setJobs(data)
     } catch (error) {
       console.error('Failed to fetch jobs:', error)
+      // Set empty array to prevent infinite loading
+      setJobs([])
     }
   }
 

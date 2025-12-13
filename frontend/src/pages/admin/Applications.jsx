@@ -25,6 +25,109 @@ import {
 } from 'lucide-react'
 import '../../styles/Applications.css'
 
+// Jobs data for job title resolution
+const jobs = [
+  {
+    id: 1,
+    title: 'Senior Frontend Developer',
+    department: 'Engineering',
+    location: 'Bangalore / Remote',
+    type: 'Full-time',
+    experience: '5+ years',
+    salary: '8 LPA - 12 LPA',
+    category: 'engineering',
+    level: 'Senior'
+  },
+  {
+    id: 2,
+    title: 'Product Manager',
+    department: 'Product',
+    location: 'Hyderabad / Hybrid',
+    type: 'Full-time',
+    experience: '3-5 years',
+    salary: '6 LPA - 9 LPA',
+    category: 'product',
+    level: 'Mid-level'
+  },
+  {
+    id: 3,
+    title: 'Backend Engineer',
+    department: 'Engineering',
+    location: 'Pune',
+    type: 'Full-time',
+    experience: '3-5 years',
+    salary: '7 LPA - 10 LPA',
+    category: 'engineering',
+    level: 'Mid-level'
+  },
+  {
+    id: 4,
+    title: 'UX Designer',
+    department: 'Design',
+    location: 'Bangalore',
+    type: 'Full-time',
+    experience: '2-4 years',
+    salary: '5 LPA - 7 LPA',
+    category: 'design',
+    level: 'Mid-level'
+  },
+  {
+    id: 5,
+    title: 'Data Scientist',
+    department: 'Data',
+    location: 'Remote / Pune',
+    type: 'Full-time',
+    experience: '4-6 years',
+    salary: '6 LPA - 8 LPA',
+    category: 'data',
+    level: 'Senior'
+  },
+  {
+    id: 6,
+    title: 'Marketing Manager',
+    department: 'Marketing',
+    location: 'Hyderabad',
+    type: 'Full-time',
+    experience: '3-5 years',
+    salary: '4 LPA - 6 LPA',
+    category: 'marketing',
+    level: 'Mid-level'
+  },
+  {
+    id: 7,
+    title: 'DevOps Engineer',
+    department: 'Engineering',
+    location: 'Bangalore',
+    type: 'Full-time',
+    experience: '4-6 years',
+    salary: '6 LPA - 8 LPA',
+    category: 'engineering',
+    level: 'Senior'
+  },
+  {
+    id: 8,
+    title: 'Content Strategist',
+    department: 'Marketing',
+    location: 'Remote',
+    type: 'Full-time',
+    experience: '2-4 years',
+    salary: '3 LPA - 4 LPA',
+    category: 'marketing',
+    level: 'Mid-level'
+  },
+  {
+    id: 9,
+    title: 'Full Stack Developer',
+    department: 'Engineering',
+    location: 'Bangalore / Hybrid',
+    type: 'Full-time',
+    experience: '3-5 years',
+    salary: '6 LPA - 9 LPA',
+    category: 'engineering',
+    level: 'Mid-level'
+  }
+]
+
 const Applications = () => {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
@@ -45,6 +148,40 @@ const Applications = () => {
   useEffect(() => {
     fetchApplications()
   }, [])
+
+  // Function to get job details by ID
+  const getJobById = (jobId) => {
+    return jobs.find(job => job.id === parseInt(jobId))
+  }
+
+  // Function to clean up job title display
+  const getJobTitle = (application) => {
+    console.log('Getting job title for application:', application)
+    
+    // First try to get job title from jobs array using jobId
+    if (application.jobId) {
+      console.log('Looking for job with ID:', application.jobId)
+      const job = getJobById(application.jobId)
+      console.log('Found job:', job)
+      if (job) {
+        console.log('Returning job title:', job.title)
+        return job.title
+      }
+    }
+    
+    // Fallback to jobTitle from application, but clean it up
+    if (application.jobTitle) {
+      const title = application.jobTitle
+      console.log('Using application jobTitle:', title)
+      // Remove any "#" prefixes and clean up the title
+      const cleanedTitle = title.replace(/^#+\s*/, '').trim()
+      console.log('Cleaned title:', cleanedTitle)
+      return cleanedTitle
+    }
+    
+    console.log('Returning General Application')
+    return 'General Application'
+  }
 
   useEffect(() => {
     const filtered = applications.filter(app => {
@@ -80,21 +217,28 @@ const Applications = () => {
       setLoading(true)
       console.log('Fetching applications from API...')
       const response = await applicationAPI.getAllApplications()
-      console.log('API Response:', response)
-      console.log('Applications data:', response.data)
+      console.log('Applications fetched:', response.data)
       setApplications(response.data)
       
-      // Extract unique jobs from applications
-      const uniqueJobs = [...new Map(response.data
+      // Extract unique jobs for filter dropdown
+      const uniqueJobs = [...new Set(response.data
         .filter(app => app.jobId && app.jobTitle)
         .map(app => [app.jobId, { id: app.jobId, title: app.jobTitle, department: app.jobDepartment }])
-      ).values()]
-      console.log('Available jobs:', uniqueJobs)
+        .filter(([jobId, job]) => jobId && job.title))
+      ]
       setAvailableJobs(uniqueJobs)
+      
+      // Calculate stats
+      const newStats = {
+        total: response.data.length,
+        pending: response.data.filter(app => app.status === 'PENDING').length,
+        underReview: response.data.filter(app => app.status === 'UNDER_REVIEW').length,
+        accepted: response.data.filter(app => app.status === 'ACCEPTED').length,
+        rejected: response.data.filter(app => app.status === 'REJECTED').length
+      }
+      setStats(newStats)
     } catch (error) {
       console.error('Error fetching applications:', error)
-      console.error('Error response:', error.response)
-      console.error('Error status:', error.response?.status)
     } finally {
       setLoading(false)
     }
@@ -364,7 +508,7 @@ const Applications = () => {
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-secondary-600">
                   <Briefcase className="w-4 h-4 text-primary-500" />
-                  <span>{application.jobTitle || 'General Application'}</span>
+                  <span>{getJobTitle(application)}</span>
                 </div>
               </div>
 
@@ -375,7 +519,7 @@ const Applications = () => {
                     <Briefcase className="w-4 h-4 text-blue-600" />
                     <div>
                       <span className="font-medium text-blue-900">Position: </span>
-                      <span className="text-blue-800">{application.jobTitle || 'Unknown Position'}</span>
+                      <span className="text-blue-800">{getJobTitle(application)}</span>
                       {application.jobDepartment && (
                         <>
                           <span className="text-blue-600 mx-2">•</span>

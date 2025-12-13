@@ -154,19 +154,23 @@ public class AuthController {
             // Generate reset token (simple implementation)
             String resetToken = "RESET-" + System.currentTimeMillis() + "-" + email.hashCode();
             
-            // Send password reset email
-            String[] names = user.getName().split(" ", 2);
-            String firstName = names.length > 0 ? names[0] : "User";
-            
-            // For now, send a simple email (we'll improve this later)
-            emailService.sendWelcomeEmail(email, firstName, ""); // Reuse welcome email for now
-            
-            System.out.println("Password reset requested for: " + email);
-            System.out.println("Reset token: " + resetToken);
+            // Send password reset email only if user exists
+            if (user != null) {
+                String[] names = user.getName().split(" ", 2);
+                String firstName = names.length > 0 ? names[0] : "User";
+                
+                // For now, send a simple email (we'll improve this later)
+                emailService.sendWelcomeEmail(email, firstName, ""); // Reuse welcome email for now
+                
+                System.out.println("Password reset email sent to: " + email);
+                System.out.println("Reset token: " + resetToken);
+            } else {
+                System.out.println("Password reset requested for non-existent email: " + email);
+            }
             
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Password reset link sent to your email",
+                "message", "If an account exists with this email, a reset link has been sent",
                 "email", email
             ));
             
