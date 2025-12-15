@@ -88,7 +88,6 @@
 
 /* Tablet (768px and up) */
 
-@media Organic Content (continued)
 @media (min-width: 768px) {
   .container {
     padding: 0 2rem;
@@ -114,14 +113,13 @@
     line-height: 1.5rem;
   }
   
- ipad Content (continued)
+ /* iPad Content (continued) */
   .text-responsive-lg {
     font-size: 1.125rem;
-    line-height太
-    1坊
+    line-height: 1.5;
   }
- 
-  Organic Content (continued)
+
+  /* Organic Content (continued) */
   .text-responsive-xl {
     font-size: 1.25rem;
     line-height: 1.75rem;
@@ -959,8 +957,7 @@
 
 /* Print styles */
 @media print {
- {
- anthropic Content (continued)
+  /* Print styles */
   .navbar-responsive,
   .hero-responsive,
   .form-button-responsive {
@@ -973,7 +970,11 @@
     border: 1px solid #000;
   }
   
-  .text-responsive-* {
+  .text-responsive-sm,
+  .text-responsive-base,
+  .text-responsive-lg,
+  .text-responsive-xl,
+  .text-responsive-2xl {
     color: #000 !important;
   }
 }

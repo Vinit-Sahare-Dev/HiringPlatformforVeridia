@@ -1,14 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Import responsive styles */
 @import './styles/responsive.css';
 @import './styles/ApplicationsResponsive.css';
 @import './styles/NavbarResponsive.css';
 @import './styles/HeroResponsive.css';
 @import './styles/FormsResponsive.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {

@@ -215,18 +215,10 @@
   .form-radio-group {
     display: flex;
     flex-direction: column;
-    gap: 0.;75rem<|code_suffix|>  
-      -nitt  .form-checkbox-groupgies
-     .form-radio-group {
-    gap:.
-   al 1新一轮
- H
- .
+    gap: 0.75rem;
   }
-0.N
   
- ; 
-  form-checkbox-group,
+  .form-checkbox-group,
   .form-radio-group {
     flex-direction: row;
     flex-wrap: wrap;
@@ -262,22 +254,11 @@
     cursor: pointer;
   }
   
-  @media (min-width.
- .75rem
- .
-  ..
-  .  .form-checkbox .formK
-  .form-checkbox-label,
-.
-  . .form .form;75
-  
-   .  . .form 75
-  
- ; 75
-  
-  .form-checkbox-label,
-  .form-radio-label {
-    font-size: 1rem;
+  @media (min-width: 768px) {
+    .form-checkbox-label,
+    .form-radio-label {
+      font-size: 1rem;
+    }
   }
   
   /* Form file input */
@@ -738,3 +719,4 @@
       transform: rotate(360deg);
     }
   }
+}

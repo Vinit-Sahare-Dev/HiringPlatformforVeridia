@@ -728,6 +728,7 @@
   margin-bottom: 1rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -736,6 +737,7 @@
   .careers-job-description {
     font-size: 1rem;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 }
 
@@ -1021,6 +1023,7 @@
   .careers-job-description {
     font-size: 0.8rem;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 }
 
@@ -1041,8 +1044,6 @@
   .careers-job-apply-btn:active {
     transform: scale(0.95);
   }
-}
-  opacity: 0.8;
 }
 
 /* Filters Section */
