@@ -86,7 +86,7 @@ public class ApplicationController {
             try {
                 String jobTitle = "Position";
                 if (applicationRequest.getJobId() != null) {
-                    Job job = jobService.getJobById((Long) applicationRequest.getJobId());
+                    Job job = jobService.getJobById(applicationRequest.getJobId());
                     if (job != null) {
                         jobTitle = job.getTitle();
                     }
