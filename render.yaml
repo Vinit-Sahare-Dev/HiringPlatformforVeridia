@@ -1,0 +1,76 @@
+services:
+  # MySQL Database Service
+  - type: pserv
+    name: veridia-mysql
+    env: docker
+    repo: https://github.com/Vinit-Sahare-Dev/Veridiahiringplatform.git
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: veridiaroot
+      - key: MYSQL_DATABASE
+        value: veridia_hiring
+      - key: MYSQL_USER
+        value: veridia
+      - key: MYSQL_PASSWORD
+        value: veridiapass
+    disks:
+      - name: mysql-data
+        mountPath: /var/lib/mysql
+        sizeGB: 10
+
+  # Backend Spring Boot Service
+  - type: web
+    name: veridia-backend
+    env: docker
+    repo: https://github.com/Vinit-Sahare-Dev/Veridiahiringplatform.git
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    healthCheck:
+      path: /api/health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+      timeoutSeconds: 10
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: DB_URL
+        value: jdbc:mysql://veridia-mysql:3306/veridia_hiring?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - key: DB_USERNAME
+        value: veridia
+      - key: DB_PASSWORD
+        value: veridiapass
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: "86400000"
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://veridia-frontend.onrender.com
+    dependsOn:
+      - veridia-mysql
+
+  # Frontend React Service
+  - type: web
+    name: veridia-frontend
+    env: static
+    repo: https://github.com/Vinit-Sahare-Dev/Veridiahiringplatform.git
+    rootDir: ./frontend
+    buildCommand: npm run build
+    publishPath: ./dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://veridia-backend.onrender.com
+    dependsOn:
+      - veridia-backend
+
+# Global configuration
+version: "1"
+autoDeploy: true
