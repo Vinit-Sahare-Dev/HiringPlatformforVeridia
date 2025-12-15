@@ -189,12 +189,13 @@
   .hero-actions {
     flex-direction: row;
     gap: 1.5rem;
+    justify-content: center;
   }
 }
 
 @media (min-width: 768px) {
   .hero-actions {
-    justify-content: flex-start;
+    justify-content: center;
     gap: 2rem;
   }
 }
