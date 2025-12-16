@@ -16,7 +16,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Production stage
-FROM openjdk:17-jre-slim-bullseye AS production
+FROM openjdk:17-jre-slim AS production
 
 # Install necessary packages and clean up
 RUN apt-get update && apt-get install -y \
