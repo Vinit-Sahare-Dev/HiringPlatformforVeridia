@@ -24,11 +24,11 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: production
       - key: DB_URL
-        value: ${veridia-mysql.DATABASE_URL}
+        value: jdbc:mysql://${veridia-mysql.HOSTNAME}:${veridia-mysql.PORT}/${veridia-mysql.DATABASE_NAME}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       - key: DB_USERNAME
-        value: ${veridia-mysql.USERNAME}
+        value: root
       - key: DB_PASSWORD
-        value: ${veridia-mysql.PASSWORD}
+        value: newpassword
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRATION
