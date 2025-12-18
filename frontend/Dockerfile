@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies (including devDependencies for build)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -30,9 +30,9 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy built assets from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S nginx -u 1001 -G nginx
+# Create non-root user for security (skip if already exists)
+RUN addgroup -g 1001 -S nginx || true && \
+    adduser -S nginx -u 1001 -G nginx || true
 
 # Set proper permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
