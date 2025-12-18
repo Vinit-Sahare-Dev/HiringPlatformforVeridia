@@ -7,8 +7,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-veridia_hiring}
-      MYSQL_USER: ${MYSQL_USER:-veridia}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-veridiapass}
+      MYSQL_USER: ${MYSQL_USER:-root}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-newpassword}
     ports:
       - "3307:3306"
     volumes:
@@ -31,8 +31,11 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: production
       DB_URL: jdbc:mysql://${DB_HOST:-mysql}:${DB_PORT:-3306}/${DB_NAME:-veridia_hiring}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      DB_USERNAME: ${DB_USERNAME:-veridia}
-      DB_PASSWORD: ${DB_PASSWORD:-veridiapass}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-newpassword}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: veridia_hiring
       JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-here-change-in-production}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
@@ -64,7 +67,7 @@ services:
     container_name: veridia-frontend
     restart: unless-stopped
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8081/api}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://backend:8081/api}
     ports:
       - "80:80"
     depends_on:
