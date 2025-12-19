@@ -5,10 +5,8 @@ services:
     container_name: veridia-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-veridia_hiring}
-      MYSQL_USER: ${MYSQL_USER:-root}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-newpassword}
+      MYSQL_ROOT_PASSWORD: newpassword
+      MYSQL_DATABASE: veridia_hiring
     ports:
       - "3307:3306"
     volumes:
@@ -30,19 +28,19 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: production
-      DB_URL: jdbc:mysql://${DB_HOST:-mysql}:${DB_PORT:-3306}/${DB_NAME:-veridia_hiring}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      DB_USERNAME: ${DB_USERNAME:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-newpassword}
+      DB_URL: jdbc:mysql://mysql:3306/veridia_hiring?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: newpassword
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: veridia_hiring
       JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-here-change-in-production}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
-      MAIL_FROM: ${MAIL_FROM:-your-email@gmail.com}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-empsyncofficial@gmail.com}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-twzixhovwttuuyyh}
+      SPRING_MAIL_FROM: ${SPRING_MAIL_FROM:-empsyncofficial@gmail.com}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:3000}
     ports:
       - "8081:8081"

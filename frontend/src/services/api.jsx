@@ -38,10 +38,10 @@ api.interceptors.response.use(
     
     // Handle different error types
     if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-      console.error('❌ Backend server not running on port 8080')
+      console.error('❌ Backend server not running on port 8081')
       return Promise.reject({
         code: error.code,
-        message: 'Cannot connect to server. Please ensure the backend is running on port 8080.'
+        message: 'Cannot connect to server. Please ensure the backend is running on port 8081.'
       })
     }
     
