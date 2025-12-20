@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message
       } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        errorMessage = 'Cannot connect to server. Please check if the backend is running on port 8080.'
+        errorMessage = 'Cannot connect to server. Please check if the backend is running on port 8081.'
       }
       
       return { 
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message
       } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        errorMessage = 'Cannot connect to server. Please check if the backend is running on port 8080.'
+        errorMessage = 'Cannot connect to server. Please check if the backend is running on port 8081.'
       }
       
       return { 
